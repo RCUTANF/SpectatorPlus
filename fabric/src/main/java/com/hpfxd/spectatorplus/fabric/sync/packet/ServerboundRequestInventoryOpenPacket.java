@@ -4,7 +4,6 @@ import com.hpfxd.spectatorplus.fabric.sync.ServerboundSyncPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +13,7 @@ public record ServerboundRequestInventoryOpenPacket(
         UUID playerId
 ) implements ServerboundSyncPacket {
     public static final StreamCodec<FriendlyByteBuf, ServerboundRequestInventoryOpenPacket> STREAM_CODEC = CustomPacketPayload.codec(ServerboundRequestInventoryOpenPacket::write, ServerboundRequestInventoryOpenPacket::new);
-    public static final CustomPacketPayload.Type<ServerboundRequestInventoryOpenPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("spectatorplus","request_inventory_open"));
+    public static final CustomPacketPayload.Type<ServerboundRequestInventoryOpenPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.parse("spectatorplus:request_inventory_open"));
 
     public ServerboundRequestInventoryOpenPacket(FriendlyByteBuf buf) {
         this(buf.readUUID());

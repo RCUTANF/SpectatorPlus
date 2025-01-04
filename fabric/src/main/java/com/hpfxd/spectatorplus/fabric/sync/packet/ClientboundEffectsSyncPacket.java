@@ -19,7 +19,7 @@ public record ClientboundEffectsSyncPacket(
     List<SyncedEffect> effects
 ) implements ClientboundSyncPacket {
     public static final StreamCodec<FriendlyByteBuf, ClientboundEffectsSyncPacket> STREAM_CODEC = CustomPacketPayload.codec(ClientboundEffectsSyncPacket::write, ClientboundEffectsSyncPacket::new);
-    public static final CustomPacketPayload.Type<ClientboundEffectsSyncPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("spectatorplus","effects_sync"));
+    public static final CustomPacketPayload.Type<ClientboundEffectsSyncPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.parse("spectatorplus:effects_sync"));
     private static final String PERMISSION = "spectatorplus.sync.effects";
 
     public ClientboundEffectsSyncPacket(FriendlyByteBuf buf) {

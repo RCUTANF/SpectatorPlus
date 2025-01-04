@@ -17,7 +17,7 @@ public record ClientboundFoodSyncPacket(
         float saturation
 ) implements ClientboundSyncPacket {
     public static final StreamCodec<FriendlyByteBuf, ClientboundFoodSyncPacket> STREAM_CODEC = CustomPacketPayload.codec(ClientboundFoodSyncPacket::write, ClientboundFoodSyncPacket::new);
-    public static final CustomPacketPayload.Type<ClientboundFoodSyncPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("spectatorplus","food_sync"));
+    public static final CustomPacketPayload.Type<ClientboundFoodSyncPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.parse("spectatorplus:food_sync"));
     private static final String PERMISSION = "spectatorplus.sync.food";
 
     public static ClientboundFoodSyncPacket initializing(ServerPlayer target) {

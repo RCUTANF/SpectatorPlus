@@ -18,7 +18,7 @@ public record ClientboundScreenCursorSyncPacket(
         int originSlot
 ) implements ClientboundSyncPacket {
     public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundScreenCursorSyncPacket> STREAM_CODEC = CustomPacketPayload.codec(ClientboundScreenCursorSyncPacket::write, ClientboundScreenCursorSyncPacket::new);
-    public static final CustomPacketPayload.Type<ClientboundScreenCursorSyncPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("spectatorplus","screen_cursor_sync"));
+    public static final CustomPacketPayload.Type<ClientboundScreenCursorSyncPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.parse("spectatorplus:screen_cursor_sync"));
 
     public ClientboundScreenCursorSyncPacket(RegistryFriendlyByteBuf buf) {
         this(buf.readUUID(), CustomPacketCodecs.readItem(buf), buf.readByte());

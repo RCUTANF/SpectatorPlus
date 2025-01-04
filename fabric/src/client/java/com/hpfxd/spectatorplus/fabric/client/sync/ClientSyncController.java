@@ -12,7 +12,7 @@ import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundEffectsSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.SyncedEffect;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
