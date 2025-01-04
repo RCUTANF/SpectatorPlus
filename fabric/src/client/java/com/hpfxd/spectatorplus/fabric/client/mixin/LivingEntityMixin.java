@@ -50,7 +50,10 @@ public abstract class LivingEntityMixin extends Entity {
             return false;
         }
 
-        return ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).invokePick(this, player.blockInteractionRange(), player.entityInteractionRange(), 1F).getType() == HitResult.Type.BLOCK;
+        var spectated = SpecUtil.getCameraPlayer(Minecraft.getInstance());
+        var blockRange = spectated == null ? player.blockInteractionRange() : spectated.blockInteractionRange();
+        var entityRange = spectated == null ? player.entityInteractionRange() : spectated.entityInteractionRange();
+        return LocalPlayerAccessor.invokePick(this, blockRange, entityRange, 1F).getType() == HitResult.Type.BLOCK;
     }
 
     @Redirect(method = {"hasEffect", "getEffect", "getActiveEffects", "tickEffects"},
