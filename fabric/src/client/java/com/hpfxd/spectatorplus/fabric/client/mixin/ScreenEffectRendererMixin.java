@@ -15,7 +15,7 @@ public class ScreenEffectRendererMixin {
     // Redirect calls from mc.player to the current camera entity
 
     @Redirect(
-            method = "renderScreenEffect(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;)V",
+            method = "renderScreenEffect(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z")
     )
     private static boolean spectatorplus$modifyIsSpectator(LocalPlayer instance, @Local(argsOnly = true) Minecraft mc) {
@@ -23,7 +23,7 @@ public class ScreenEffectRendererMixin {
     }
 
     @Redirect(
-            method = "renderScreenEffect(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;)V",
+            method = "renderScreenEffect(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z")
     )
     private static boolean spectatorplus$modifyIsEyeInFluid(LocalPlayer instance, TagKey<Fluid> tagKey, @Local(argsOnly = true) Minecraft mc) {
@@ -31,7 +31,7 @@ public class ScreenEffectRendererMixin {
     }
 
     @Redirect(
-            method = "renderScreenEffect(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;)V",
+            method = "renderScreenEffect(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isOnFire()Z")
     )
     private static boolean spectatorplus$modifyIsOnFire(LocalPlayer instance, @Local(argsOnly = true) Minecraft mc) {
