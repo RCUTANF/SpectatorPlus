@@ -53,7 +53,28 @@ public class ServerSyncController implements PluginMessageListener {
         final ByteArrayDataOutput buf = ByteStreams.newDataOutput();
         packet.write(buf);
 
-        receiver.sendPluginMessage(this.plugin, packet.channel().asString(), buf.toByteArray());
+        // Log the size and raw bytes of the packet
+        byte[] data;
+        if (buf instanceof com.google.common.io.ByteArrayDataOutput) {
+            // ByteArrayDataOutput from Guava does not expose the byte array directly,
+            // but ByteStreams.newDataOutput() returns a ByteArrayDataOutput that is a wrapper for ByteArrayOutputStream
+            try {
+                java.lang.reflect.Field outField = buf.getClass().getDeclaredField("out");
+                outField.setAccessible(true);
+                java.io.ByteArrayOutputStream out = (java.io.ByteArrayOutputStream) outField.get(buf);
+                data = out.toByteArray();
+            } catch (Exception e) {
+                data = new byte[0];
+            }
+        } else {
+            data = new byte[0];
+        }
+        System.out.println("[Server] Sending " + packet.getClass().getSimpleName() +
+            " to " + receiver.getName() +
+            ": size=" + data.length +
+            ", bytes=" + java.util.Arrays.toString(data));
+
+        receiver.sendPluginMessage(this.plugin, packet.channel().asString(), buf instanceof com.google.common.io.ByteArrayDataOutput ? data : new byte[0]);
     }
 
     public void sendPacket(Iterable<Player> receivers, ClientboundSyncPacket packet) {

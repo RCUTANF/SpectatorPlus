@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.UUID;
 
@@ -17,10 +18,56 @@ public class ClientSyncController {
     public static ClientSyncData syncData;
 
     public static void init() {
-        ClientPlayNetworking.registerGlobalReceiver(ClientboundExperienceSyncPacket.TYPE, ClientSyncController::handle);
-        ClientPlayNetworking.registerGlobalReceiver(ClientboundFoodSyncPacket.TYPE, ClientSyncController::handle);
-        ClientPlayNetworking.registerGlobalReceiver(ClientboundHotbarSyncPacket.TYPE, ClientSyncController::handle);
-        ClientPlayNetworking.registerGlobalReceiver(ClientboundSelectedSlotSyncPacket.TYPE, ClientSyncController::handle);
+        // Experience Sync
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundExperienceSyncPacket.TYPE, (packet, context) -> {
+            if (packet instanceof ClientboundExperienceSyncPacket p) {
+                // Log packet type and raw bytes
+                if (context instanceof FriendlyByteBuf buf) {
+                    byte[] data = new byte[buf.readableBytes()];
+                    buf.getBytes(buf.readerIndex(), data);
+                    System.out.println("[Fabric] Received ClientboundExperienceSyncPacket: size=" + data.length + ", bytes=" + java.util.Arrays.toString(data));
+                } else {
+                    System.out.println("[Fabric] Received ClientboundExperienceSyncPacket");
+                }
+            }
+            handle(packet, context);
+        });
+
+        // Food Sync
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundFoodSyncPacket.TYPE, (packet, context) -> {
+            if (context instanceof FriendlyByteBuf buf) {
+                byte[] data = new byte[buf.readableBytes()];
+                buf.getBytes(buf.readerIndex(), data);
+                System.out.println("[Fabric] Received ClientboundFoodSyncPacket: size=" + data.length + ", bytes=" + java.util.Arrays.toString(data));
+            } else {
+                System.out.println("[Fabric] Received ClientboundFoodSyncPacket");
+            }
+            handle(packet, context);
+        });
+
+        // Hotbar Sync
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundHotbarSyncPacket.TYPE, (packet, context) -> {
+            if (context instanceof FriendlyByteBuf buf) {
+                byte[] data = new byte[buf.readableBytes()];
+                buf.getBytes(buf.readerIndex(), data);
+                System.out.println("[Fabric] Received ClientboundHotbarSyncPacket: size=" + data.length + ", bytes=" + java.util.Arrays.toString(data));
+            } else {
+                System.out.println("[Fabric] Received ClientboundHotbarSyncPacket");
+            }
+            handle(packet, context);
+        });
+
+        // Selected Slot Sync
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundSelectedSlotSyncPacket.TYPE, (packet, context) -> {
+            if (context instanceof FriendlyByteBuf buf) {
+                byte[] data = new byte[buf.readableBytes()];
+                buf.getBytes(buf.readerIndex(), data);
+                System.out.println("[Fabric] Received ClientboundSelectedSlotSyncPacket: size=" + data.length + ", bytes=" + java.util.Arrays.toString(data));
+            } else {
+                System.out.println("[Fabric] Received ClientboundSelectedSlotSyncPacket");
+            }
+            handle(packet, context);
+        });
 
         ClientLoginConnectionEvents.INIT.register((handler, client) -> setSyncData(null));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> setSyncData(null));

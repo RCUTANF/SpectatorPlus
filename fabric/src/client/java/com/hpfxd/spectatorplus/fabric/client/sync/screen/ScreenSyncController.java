@@ -17,6 +17,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
 
 import static com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController.setSyncData;
 import static com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController.syncData;
@@ -35,9 +36,38 @@ public class ScreenSyncController {
             }
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(ClientboundScreenSyncPacket.TYPE, ScreenSyncController::handle);
-        ClientPlayNetworking.registerGlobalReceiver(ClientboundInventorySyncPacket.TYPE, ScreenSyncController::handle);
-        ClientPlayNetworking.registerGlobalReceiver(ClientboundScreenCursorSyncPacket.TYPE, ScreenSyncController::handle);
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundScreenSyncPacket.TYPE, (packet, context) -> {
+            if (context instanceof FriendlyByteBuf buf) {
+                byte[] data = new byte[buf.readableBytes()];
+                buf.getBytes(buf.readerIndex(), data);
+                System.out.println("[Fabric] Received ClientboundScreenSyncPacket: size=" + data.length + ", bytes=" + java.util.Arrays.toString(data));
+            } else {
+                System.out.println("[Fabric] Received ClientboundScreenSyncPacket");
+            }
+            handle(packet, context);
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundInventorySyncPacket.TYPE, (packet, context) -> {
+            if (context instanceof FriendlyByteBuf buf) {
+                byte[] data = new byte[buf.readableBytes()];
+                buf.getBytes(buf.readerIndex(), data);
+                System.out.println("[Fabric] Received ClientboundInventorySyncPacket: size=" + data.length + ", bytes=" + java.util.Arrays.toString(data));
+            } else {
+                System.out.println("[Fabric] Received ClientboundInventorySyncPacket");
+            }
+            handle(packet, context);
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundScreenCursorSyncPacket.TYPE, (packet, context) -> {
+            if (context instanceof FriendlyByteBuf buf) {
+                byte[] data = new byte[buf.readableBytes()];
+                buf.getBytes(buf.readerIndex(), data);
+                System.out.println("[Fabric] Received ClientboundScreenCursorSyncPacket: size=" + data.length + ", bytes=" + java.util.Arrays.toString(data));
+            } else {
+                System.out.println("[Fabric] Received ClientboundScreenCursorSyncPacket");
+            }
+            handle(packet, context);
+        });
     }
 
     private static void handle(ClientboundScreenSyncPacket packet, ClientPlayNetworking.Context context) {
