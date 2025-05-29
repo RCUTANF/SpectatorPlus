@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+import com.hpfxd.spectatorplus.fabric.sync.MinimalItemUtil;
 
 public record ClientboundHotbarSyncPacket(
         UUID playerId,
@@ -32,12 +33,12 @@ public record ClientboundHotbarSyncPacket(
     }
 
     public ClientboundHotbarSyncPacket(RegistryFriendlyByteBuf buf) {
-        this(buf.readUUID(), CustomPacketCodecs.readItems(buf));
+        this(buf.readUUID(), MinimalItemUtil.readMinimalItems(buf));
     }
 
     public void write(RegistryFriendlyByteBuf buf) {
         buf.writeUUID(this.playerId);
-        CustomPacketCodecs.writeItems(buf, this.items);
+        MinimalItemUtil.writeMinimalItems(buf, this.items); // Use minimal serialization for cross-platform
     }
 
     @Override

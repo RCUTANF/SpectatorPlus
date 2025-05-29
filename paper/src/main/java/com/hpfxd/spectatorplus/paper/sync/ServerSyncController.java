@@ -18,6 +18,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.jetbrains.annotations.NotNull;
+import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundHotbarSyncPacket;
+import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundSelectedSlotSyncPacket;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -50,34 +52,21 @@ public class ServerSyncController implements PluginMessageListener {
     }
 
     public void sendPacket(Player receiver, ClientboundSyncPacket packet) {
+        if (!(packet instanceof ClientboundHotbarSyncPacket)) return; // Only allow experience sync
         final ByteArrayDataOutput buf = ByteStreams.newDataOutput();
         packet.write(buf);
 
-        // Log the size and raw bytes of the packet
-        byte[] data;
-        if (buf instanceof com.google.common.io.ByteArrayDataOutput) {
-            // ByteArrayDataOutput from Guava does not expose the byte array directly,
-            // but ByteStreams.newDataOutput() returns a ByteArrayDataOutput that is a wrapper for ByteArrayOutputStream
-            try {
-                java.lang.reflect.Field outField = buf.getClass().getDeclaredField("out");
-                outField.setAccessible(true);
-                java.io.ByteArrayOutputStream out = (java.io.ByteArrayOutputStream) outField.get(buf);
-                data = out.toByteArray();
-            } catch (Exception e) {
-                data = new byte[0];
-            }
-        } else {
-            data = new byte[0];
-        }
+        byte[] data = buf.toByteArray();
         System.out.println("[Server] Sending " + packet.getClass().getSimpleName() +
             " to " + receiver.getName() +
             ": size=" + data.length +
             ", bytes=" + java.util.Arrays.toString(data));
 
-        receiver.sendPluginMessage(this.plugin, packet.channel().asString(), buf instanceof com.google.common.io.ByteArrayDataOutput ? data : new byte[0]);
+        receiver.sendPluginMessage(this.plugin, packet.channel().asString(), data);
     }
 
     public void sendPacket(Iterable<Player> receivers, ClientboundSyncPacket packet) {
+        if (!(packet instanceof ClientboundHotbarSyncPacket)) return; // Only allow experience sync
         final Iterator<Player> it = receivers.iterator();
         if (!it.hasNext()) return;
 

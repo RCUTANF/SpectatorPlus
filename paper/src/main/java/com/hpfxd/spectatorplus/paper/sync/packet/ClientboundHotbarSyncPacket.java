@@ -3,6 +3,7 @@ package com.hpfxd.spectatorplus.paper.sync.packet;
 import com.google.common.io.ByteArrayDataOutput;
 import com.hpfxd.spectatorplus.paper.sync.ClientboundSyncPacket;
 import com.hpfxd.spectatorplus.paper.util.SerializationUtil;
+import com.hpfxd.spectatorplus.paper.util.MinimalItemUtil;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,7 +19,7 @@ public record ClientboundHotbarSyncPacket(
     @Override
     public void write(ByteArrayDataOutput buf) {
         SerializationUtil.writeUuid(buf, this.playerId);
-        SerializationUtil.writeItems(buf, this.items);
+        MinimalItemUtil.writeMinimalItems(buf, this.items); // Use minimal serialization
     }
 
     @Override

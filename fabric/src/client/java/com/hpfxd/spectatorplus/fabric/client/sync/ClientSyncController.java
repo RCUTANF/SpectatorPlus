@@ -39,10 +39,10 @@ public class ClientSyncController {
                 byte[] data = new byte[buf.readableBytes()];
                 buf.getBytes(buf.readerIndex(), data);
                 System.out.println("[Fabric] Received ClientboundFoodSyncPacket: size=" + data.length + ", bytes=" + java.util.Arrays.toString(data));
+                handle(packet, context);
             } else {
                 System.out.println("[Fabric] Received ClientboundFoodSyncPacket");
             }
-            handle(packet, context);
         });
 
         // Hotbar Sync
