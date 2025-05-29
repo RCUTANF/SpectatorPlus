@@ -26,7 +26,8 @@
     "screen.ImageButtonAccessor",
     "screen.InventoryMenuMixin",
     "screen.InventoryScreenMixin",
-    "screen.MenuScreensMixin"
+    "screen.MenuScreensMixin",
+    "InventoryAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
