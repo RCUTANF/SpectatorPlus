@@ -9,6 +9,7 @@
     "GameRendererAccessor",
     "GameRendererMixin",
     "GuiMixin",
+    "InventoryAccessor",
     "ItemInHandRendererAccessor",
     "ItemInHandRendererMixin",
     "LevelRendererAccessor",
@@ -26,8 +27,7 @@
     "screen.ImageButtonAccessor",
     "screen.InventoryMenuMixin",
     "screen.InventoryScreenMixin",
-    "screen.MenuScreensMixin",
-    "InventoryAccessor"
+    "screen.MenuScreensMixin"
   ],
   "injectors": {
     "defaultRequire": 1
