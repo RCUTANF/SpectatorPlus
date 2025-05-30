@@ -5,7 +5,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 import java.io.ByteArrayInputStream;
@@ -13,9 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public final class CustomPacketCodecs {
-    public static final StreamCodec<RegistryFriendlyByteBuf, ItemStack> ITEM_CODEC = StreamCodec.of(CustomPacketCodecs::writeItem, CustomPacketCodecs::readItem);
-    public static final StreamCodec<RegistryFriendlyByteBuf, ItemStack[]> ITEM_ARRAY_CODEC = StreamCodec.of(CustomPacketCodecs::writeItems, CustomPacketCodecs::readItems);
-
     private CustomPacketCodecs() {
     }
 
