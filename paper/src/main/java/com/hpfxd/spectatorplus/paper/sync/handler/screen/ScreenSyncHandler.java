@@ -82,6 +82,7 @@ public class ScreenSyncHandler implements Listener {
             case BLAST_FURNACE:
             case LECTERN:
             case SMOKER:
+            case CRAFTER:
                 this.openSyncedDirectContainer(spectator, targetView);
                 break;
             case WORKBENCH:
