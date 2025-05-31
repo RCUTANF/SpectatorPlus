@@ -6,6 +6,7 @@ import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundExperienceSyncPacket
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundHotbarSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundInventorySyncPacket;
+import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundMerchantSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundScreenCursorSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundScreenSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundSelectedSlotSyncPacket;
@@ -25,6 +26,7 @@ public final class SyncPackets {
             .put(ClientboundScreenCursorSyncPacket.ID, ClientboundScreenCursorSyncPacket.class)
             .put(ClientboundScreenSyncPacket.ID, ClientboundScreenSyncPacket.class)
             .put(ClientboundSelectedSlotSyncPacket.ID, ClientboundSelectedSlotSyncPacket.class)
+            .put(ClientboundMerchantSyncPacket.ID, ClientboundMerchantSyncPacket.class)
             .build();
 
     public static final Map<NamespacedKey, Function<ByteArrayDataInput, ? extends ServerboundSyncPacket>> SERVERBOUND = ImmutableMap.<NamespacedKey, Function<ByteArrayDataInput, ? extends ServerboundSyncPacket>>builder()

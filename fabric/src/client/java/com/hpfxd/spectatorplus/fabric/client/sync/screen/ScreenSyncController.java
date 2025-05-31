@@ -6,6 +6,8 @@ import com.hpfxd.spectatorplus.fabric.client.util.SpecUtil;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundInventorySyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundScreenCursorSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundScreenSyncPacket;
+import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundMerchantSyncPacket;
+import com.hpfxd.spectatorplus.fabric.client.gui.screens.SyncedMerchantScreen;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -40,6 +42,17 @@ public class ScreenSyncController {
         ClientPlayNetworking.registerGlobalReceiver(ClientboundScreenSyncPacket.TYPE, ScreenSyncController::handle);
         ClientPlayNetworking.registerGlobalReceiver(ClientboundInventorySyncPacket.TYPE, ScreenSyncController::handle);
         ClientPlayNetworking.registerGlobalReceiver(ClientboundScreenCursorSyncPacket.TYPE, ScreenSyncController::handle);
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundMerchantSyncPacket.TYPE, ScreenSyncController::handle);
+    }
+
+    // ...inside ScreenSyncController...
+    private static void handle(ClientboundMerchantSyncPacket packet, ClientPlayNetworking.Context context) {
+        Minecraft.getInstance().execute(() -> {
+            // Open a custom merchant/trade screen using the offers and selected offer from the packet
+            Minecraft mc = Minecraft.getInstance();
+            SyncedMerchantScreen screen = new SyncedMerchantScreen(packet.offers(), packet.selectedOffer());
+            mc.setScreen(screen);
+        });
     }
 
     private static void handle(ClientboundScreenSyncPacket packet, ClientPlayNetworking.Context context) {

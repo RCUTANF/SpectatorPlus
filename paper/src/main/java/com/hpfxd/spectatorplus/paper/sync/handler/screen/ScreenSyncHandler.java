@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerStartSpectatingEntityEvent;
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import com.hpfxd.spectatorplus.paper.SpectatorPlugin;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundInventorySyncPacket;
+import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundMerchantSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundScreenCursorSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundScreenSyncPacket;
 import net.kyori.adventure.text.Component;
@@ -25,6 +26,7 @@ import org.bukkit.inventory.PlayerInventory;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -70,6 +72,9 @@ public class ScreenSyncHandler implements Listener {
         // todo MERCHANT
 
         switch (targetView.getType()) {
+            case MERCHANT:
+                this.openSyncedMerchantContainer(spectator, targetView);
+                break;
             case CHEST:
             case DISPENSER:
             case DROPPER:
@@ -109,6 +114,33 @@ public class ScreenSyncHandler implements Listener {
         } else {
             spectator.sendMessage(Component.translatable("spectatorplus.no-inventory-permission", NamedTextColor.RED));
         }
+    }
+
+    private void openSyncedMerchantContainer(Player spectator, InventoryView targetView) {
+        // Get the offers and selected offer from the targetView
+        // This is a simplified example; you may need to adapt for your API version
+        var merchant = (org.bukkit.inventory.MerchantInventory) targetView.getTopInventory();
+        var offers = merchant.getMerchant().getRecipes();
+        int selectedOffer = 0; // You may need to get this from the target player
+
+        List<ClientboundMerchantSyncPacket.TradeOfferData> offerData = new java.util.ArrayList<>();
+        for (var offer : offers) {
+            offerData.add(new ClientboundMerchantSyncPacket.TradeOfferData(
+                offer.getIngredients().size() > 0 ? offer.getIngredients().get(0) : null,
+                offer.getIngredients().size() > 1 ? offer.getIngredients().get(1) : null,
+                offer.getResult(),
+                !offer.hasExperienceReward() // or your logic for out of stock
+            ));
+        }
+
+        this.plugin.getSyncController().sendPacket(
+            spectator,
+            new ClientboundMerchantSyncPacket(
+                ((Player) targetView.getPlayer()).getUniqueId(),
+                offerData,
+                selectedOffer
+            )
+        );
     }
 
     public void onPlayerOpenInventory(Player target) {

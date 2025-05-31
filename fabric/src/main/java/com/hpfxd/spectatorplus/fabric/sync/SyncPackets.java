@@ -9,6 +9,7 @@ import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundScreenSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundSelectedSlotSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ServerboundOpenedInventorySyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ServerboundRequestInventoryOpenPacket;
+import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundMerchantSyncPacket;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 public final class SyncPackets {
@@ -23,6 +24,7 @@ public final class SyncPackets {
         PayloadTypeRegistry.playS2C().register(ClientboundScreenCursorSyncPacket.TYPE, ClientboundScreenCursorSyncPacket.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ClientboundScreenSyncPacket.TYPE, ClientboundScreenSyncPacket.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ClientboundSelectedSlotSyncPacket.TYPE, ClientboundSelectedSlotSyncPacket.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(ClientboundMerchantSyncPacket.TYPE, ClientboundMerchantSyncPacket.STREAM_CODEC);
     }
 
     private SyncPackets() {
