@@ -1,6 +1,7 @@
 plugins {
     id("spectatorplus.platform")
     id("io.github.goooler.shadow") version "8.1.7"
+    id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
 description = "Paper server-side companion for the SpectatorPlus mod"
@@ -43,6 +44,10 @@ tasks {
 
     jar {
         enabled = false // only output shadow jar
+    }
+
+    runServer {
+        minecraftVersion("1.21.6")
     }
 
     named("build") {
