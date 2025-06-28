@@ -7,7 +7,7 @@ import com.hpfxd.spectatorplus.fabric.client.sync.screen.ScreenSyncController;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -66,12 +66,10 @@ public abstract class AbstractContainerScreenMixin {
     }
 
     @Inject(
-            method = "render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V",
+            method = "renderContents",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;renderLabels(Lnet/minecraft/client/gui/GuiGraphics;II)V",
-                    ordinal = 0,
-                    shift = At.Shift.AFTER
+                    target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;renderLabels(Lnet/minecraft/client/gui/GuiGraphics;II)V"
             )
     )
     private void spectatorplus$renderSyncedCursorItem(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
@@ -125,11 +123,11 @@ public abstract class AbstractContainerScreenMixin {
     private void spectatorplus$renderCursorItem(GuiGraphics guiGraphics, ItemStack stack, int cursorX, int cursorY) {
         final Slot hoverSlot = this.getHoveredSlot(cursorX + this.leftPos + 8, cursorY + this.topPos + 8);
         if (hoverSlot != null && hoverSlot.isHighlightable()) {
-            guiGraphics.blitSprite(RenderType::guiTextured, SLOT_HIGHLIGHT_BACK_SPRITE, hoverSlot.x - 4, hoverSlot.y - 4, 24, 24);
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_SPRITE, hoverSlot.x - 4, hoverSlot.y - 4, 24, 24);
         }
         this.renderFloatingItem(guiGraphics, stack, cursorX, cursorY, null);
         if (hoverSlot != null && hoverSlot.isHighlightable()) {
-            guiGraphics.blitSprite(RenderType::guiTexturedOverlay, SLOT_HIGHLIGHT_FRONT_SPRITE, hoverSlot.x - 4, hoverSlot.y - 4, 24, 24);
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_FRONT_SPRITE, hoverSlot.x - 4, hoverSlot.y - 4, 24, 24);
         }
     }
 
