@@ -43,8 +43,11 @@ public abstract class ServerPlayerMixin extends Player {
     @Shadow public abstract boolean teleportTo(ServerLevel newLevel, double x, double y, double z, Set<Relative> relative, float yaw, float pitch, boolean resetCamera);
     @Shadow public abstract void setCamera(@Nullable Entity entityToSpectate);
 
-    public ServerPlayerMixin(Level level, BlockPos pos, float yRot, GameProfile gameProfile) {
-        super(level, pos, yRot, gameProfile);
+    public ServerPlayerMixin(Level level, GameProfile gameProfile, BlockPos pos, float yRot) {
+        super(level, gameProfile);
+        // Set initial position and rotation after construction
+        this.setPos(pos.getX(), pos.getY(), pos.getZ());
+        this.setYRot(yRot);
     }
 
     @Inject(method = "doTick()V", at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ServerPlayer;lastFoodSaturationZero:Z", opcode = Opcodes.PUTFIELD))
