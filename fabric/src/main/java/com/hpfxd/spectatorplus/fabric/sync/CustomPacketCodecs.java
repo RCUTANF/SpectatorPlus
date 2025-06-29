@@ -4,6 +4,7 @@ import io.netty.handler.codec.EncoderException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
@@ -53,7 +54,9 @@ public final class CustomPacketCodecs {
             buf.readBytes(in);
 
             final CompoundTag tag = NbtIo.readCompressed(new ByteArrayInputStream(in), NbtAccounter.unlimitedHeap());
-            return ItemStack.parse(buf.registryAccess(), tag).orElse(ItemStack.EMPTY);
+
+            var registryOps = buf.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+            return ItemStack.CODEC.parse(registryOps, tag).resultOrPartial().orElse(ItemStack.EMPTY);
         } catch (IOException e) {
             throw new EncoderException(e);
         }
@@ -68,7 +71,8 @@ public final class CustomPacketCodecs {
         final byte[] bytes;
         try {
             final CompoundTag tag = new CompoundTag();
-            item.save(buf.registryAccess(), tag);
+            var registryOps = buf.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+            ItemStack.CODEC.encode(item, registryOps, tag).getOrThrow();
 
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             NbtIo.writeCompressed(tag, out);

@@ -46,8 +46,8 @@ public abstract class GameRendererMixin {
     @Unique private float xBobO;
     @Unique private float yBobO;
 
-    @Inject(method = "renderItemInHand(Lnet/minecraft/client/Camera;FLorg/joml/Matrix4f;)V", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4fStack;popMatrix()Lorg/joml/Matrix4fStack;", remap = false))
-    public void spectatorplus$renderItemInHand(Camera camera, float partialTicks, Matrix4f matrix4f, CallbackInfo ci, @Local PoseStack poseStackIn) {
+    @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4fStack;popMatrix()Lorg/joml/Matrix4fStack;", remap = false))
+    public void spectatorplus$renderItemInHand(float partialTicks, boolean sleeping, Matrix4f projectionMatrix, CallbackInfo ci, @Local PoseStack poseStackIn) {
         if (SpectatorClientMod.config.renderArms && this.minecraft.player != null && this.minecraft.options.getCameraType().isFirstPerson() && !this.minecraft.options.hideGui) {
             final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
             if (spectated != null && !spectated.isSpectator()) {
