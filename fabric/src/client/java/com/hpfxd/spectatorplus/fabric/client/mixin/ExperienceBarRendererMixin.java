@@ -19,7 +19,9 @@ public class ExperienceBarRendererMixin {
     @Redirect(method = "renderBackground", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;getXpNeededForNextLevel()I"))
     private int spectatorplus$showSyncedExperienceBar(LocalPlayer instance) {
         if (ClientSyncController.syncData != null && ClientSyncController.syncData.experienceLevel != -1 && SpecUtil.getCameraPlayer(this.minecraft) != null) {
-            return ClientSyncController.syncData.experienceNeededForNextLevel;
+            // If experienceNeededForNextLevel is 0, return 1 to ensure the bar renders
+            int needed = ClientSyncController.syncData.experienceNeededForNextLevel;
+            return needed > 0 ? needed : 1;
         }
         return instance.getXpNeededForNextLevel();
     }
