@@ -8,6 +8,7 @@ import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundSelectedSlotSyncPac
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 public class ClientSyncController {
     public static ClientSyncData syncData;
+    private static Minecraft minecraft = Minecraft.getInstance();
 
     public static void init() {
         ClientPlayNetworking.registerGlobalReceiver(ClientboundExperienceSyncPacket.TYPE, ClientSyncController::handle);
@@ -30,6 +32,10 @@ public class ClientSyncController {
 
     private static void handle(ClientboundExperienceSyncPacket packet, ClientPlayNetworking.Context context) {
         setSyncData(packet.playerId());
+
+        var player = minecraft.player;
+        if (player != null && (packet.progress() != player.experienceProgress || packet.level() != player.experienceLevel))
+            player.experienceDisplayStartTick = player.tickCount;
 
         syncData.experienceProgress = packet.progress();
         syncData.experienceLevel = packet.level();

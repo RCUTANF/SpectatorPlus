@@ -5,6 +5,7 @@
   "client": [
     "ClientLevelAccessor",
     "ClientLevelMixin",
+    "ClientWaypointManagerMixin",
     "EntityMixin",
     "ExperienceBarRendererMixin",
     "GameRendererAccessor",
