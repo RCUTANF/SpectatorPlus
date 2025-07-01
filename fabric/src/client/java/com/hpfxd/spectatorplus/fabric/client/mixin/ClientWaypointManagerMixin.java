@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -35,12 +34,6 @@ public class ClientWaypointManagerMixin {
     @Inject(method = "hasWaypoints", at = @At("HEAD"), cancellable = true)
     private void spectatorplus$hasWaypoints(CallbackInfoReturnable<Boolean> cir) {
         if (ClientSyncController.syncData != null) {
-            for (var waypoint : this.waypoints.values()) {
-                if (!shouldIgnore(waypoint)) {
-                    cir.setReturnValue(true);
-                    return;
-                }
-            }
             cir.setReturnValue(false);
         }
     }
@@ -48,9 +41,6 @@ public class ClientWaypointManagerMixin {
     @Inject(method = "forEachWaypoint", at = @At("HEAD"), cancellable = true)
     private void spectatorplus$forEachWaypoint(Entity entity, Consumer<TrackedWaypoint> action, CallbackInfo ci) {
         if (ClientSyncController.syncData != null) {
-            this.waypoints.values().stream().filter(waypoint -> !shouldIgnore(waypoint))
-                    .sorted(Comparator.comparingDouble((waypoint) -> ((TrackedWaypoint) waypoint).distanceSquared(entity))
-                            .reversed()).forEachOrdered(action);
             ci.cancel();
         }
     }
