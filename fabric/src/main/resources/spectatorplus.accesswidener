@@ -5,3 +5,7 @@ accessible class net/minecraft/server/level/ChunkMap$TrackedEntity
 accessible class net/minecraft/client/renderer/ItemInHandRenderer$HandRenderSelection
 accessible field net/minecraft/client/renderer/ItemInHandRenderer$HandRenderSelection renderMainHand Z
 accessible field net/minecraft/client/renderer/ItemInHandRenderer$HandRenderSelection renderOffHand Z
+
+accessible class net/minecraft/client/gui/Gui$HeartType
+accessible method net/minecraft/client/gui/Gui renderItemHotbar (Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V
+accessible method net/minecraft/client/gui/Gui renderSelectedItemName (Lnet/minecraft/client/gui/GuiGraphics;)V

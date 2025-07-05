@@ -2,6 +2,7 @@ package com.hpfxd.spectatorplus.paper.sync;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteArrayDataInput;
+import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundEffectsSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundExperienceSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.paper.sync.packet.ClientboundHotbarSyncPacket;
@@ -18,6 +19,7 @@ import java.util.function.Function;
 
 public final class SyncPackets {
     public static final Map<NamespacedKey, Class<? extends ClientboundSyncPacket>> CLIENTBOUND = ImmutableMap.<NamespacedKey, Class<? extends ClientboundSyncPacket>>builder()
+            .put(ClientboundEffectsSyncPacket.ID, ClientboundEffectsSyncPacket.class)
             .put(ClientboundExperienceSyncPacket.ID, ClientboundExperienceSyncPacket.class)
             .put(ClientboundFoodSyncPacket.ID, ClientboundFoodSyncPacket.class)
             .put(ClientboundHotbarSyncPacket.ID, ClientboundHotbarSyncPacket.class)

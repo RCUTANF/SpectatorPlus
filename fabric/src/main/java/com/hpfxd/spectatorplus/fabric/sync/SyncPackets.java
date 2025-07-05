@@ -1,5 +1,6 @@
 package com.hpfxd.spectatorplus.fabric.sync;
 
+import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundEffectsSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundExperienceSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundHotbarSyncPacket;
@@ -16,6 +17,7 @@ public final class SyncPackets {
         PayloadTypeRegistry.playC2S().register(ServerboundOpenedInventorySyncPacket.TYPE, ServerboundOpenedInventorySyncPacket.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(ServerboundRequestInventoryOpenPacket.TYPE, ServerboundRequestInventoryOpenPacket.STREAM_CODEC);
 
+        PayloadTypeRegistry.playS2C().register(ClientboundEffectsSyncPacket.TYPE, ClientboundEffectsSyncPacket.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ClientboundExperienceSyncPacket.TYPE, ClientboundExperienceSyncPacket.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ClientboundFoodSyncPacket.TYPE, ClientboundFoodSyncPacket.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ClientboundHotbarSyncPacket.TYPE, ClientboundHotbarSyncPacket.STREAM_CODEC);

@@ -1,10 +1,15 @@
 package com.hpfxd.spectatorplus.fabric.client.sync;
 
 import com.hpfxd.spectatorplus.fabric.client.sync.screen.ScreenSyncData;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class ClientSyncData {
@@ -19,6 +24,8 @@ public class ClientSyncData {
     public int experienceLevel = -1;
 
     public ScreenSyncData screen;
+    
+    public Map<Holder<MobEffect>, MobEffectInstance> activeEffects = new HashMap<>();
 
     public ClientSyncData(UUID playerId) {
         this.playerId = playerId;

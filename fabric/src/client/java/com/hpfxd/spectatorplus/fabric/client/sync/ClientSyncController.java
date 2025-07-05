@@ -1,6 +1,7 @@
 package com.hpfxd.spectatorplus.fabric.client.sync;
 
 import com.hpfxd.spectatorplus.fabric.client.sync.screen.ScreenSyncController;
+import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundEffectsSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundExperienceSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundHotbarSyncPacket;
@@ -19,6 +20,7 @@ public class ClientSyncController {
     private static Minecraft minecraft = Minecraft.getInstance();
 
     public static void init() {
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundEffectsSyncPacket.TYPE, ClientSyncController::handle);
         ClientPlayNetworking.registerGlobalReceiver(ClientboundExperienceSyncPacket.TYPE, ClientSyncController::handle);
         ClientPlayNetworking.registerGlobalReceiver(ClientboundFoodSyncPacket.TYPE, ClientSyncController::handle);
         ClientPlayNetworking.registerGlobalReceiver(ClientboundHotbarSyncPacket.TYPE, ClientSyncController::handle);
@@ -28,6 +30,13 @@ public class ClientSyncController {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> setSyncData(null));
 
         ScreenSyncController.init();
+    }
+
+    private static void handle(ClientboundEffectsSyncPacket packet, ClientPlayNetworking.Context context) {
+        setSyncData(packet.playerId());
+        
+        syncData.activeEffects.clear();
+        syncData.activeEffects.putAll(packet.effects());
     }
 
     private static void handle(ClientboundExperienceSyncPacket packet, ClientPlayNetworking.Context context) {

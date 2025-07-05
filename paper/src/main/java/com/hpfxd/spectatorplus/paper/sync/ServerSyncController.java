@@ -5,6 +5,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.hpfxd.spectatorplus.paper.SpectatorPlugin;
+import com.hpfxd.spectatorplus.paper.sync.handler.EffectSyncHandler;
 import com.hpfxd.spectatorplus.paper.sync.handler.ExperienceSyncHandler;
 import com.hpfxd.spectatorplus.paper.sync.handler.FoodSyncHandler;
 import com.hpfxd.spectatorplus.paper.sync.handler.InventorySyncHandler;
@@ -42,6 +43,7 @@ public class ServerSyncController implements PluginMessageListener {
         this.plugin.getSLF4JLogger().info("Registered {} clientbound, {} serverbound sync packets.", SyncPackets.CLIENTBOUND.size(), SyncPackets.SERVERBOUND.size());
 
         this.screenSyncHandler = new ScreenSyncHandler(plugin);
+        new EffectSyncHandler(plugin);
         new ExperienceSyncHandler(plugin);
         new FoodSyncHandler(plugin);
         this.inventorySyncHandler = new InventorySyncHandler(plugin);

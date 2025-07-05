@@ -16,12 +16,15 @@ import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.HitResult;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -36,14 +39,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Objects;
+import java.util.Map;
 
 @Mixin(Gui.class)
 public abstract class GuiMixin {
     @Shadow @Final private Minecraft minecraft;
     @Shadow public abstract SpectatorGui getSpectatorGui();
-    @Shadow protected abstract void renderItemHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker);
-    @Shadow protected abstract void renderSelectedItemName(GuiGraphics guiGraphics);
+    @Shadow public abstract void renderItemHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker);
+    @Shadow public abstract void renderSelectedItemName(GuiGraphics guiGraphics);
 
     @Shadow @Final private SpectatorGui spectatorGui;
 
@@ -215,5 +218,65 @@ public abstract class GuiMixin {
             return player.getInventory();
         }
         return instance;
+    }
+
+    @Redirect(method = "renderHearts", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui$HeartType;forPlayer(Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/client/gui/Gui$HeartType;"))
+    private Object spectatorplus$getHeartTypeWithSyncedEffects(Player player) {
+        final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
+
+        if (spectated != null) {
+            // Use synced effects data if available
+            if (ClientSyncController.syncData != null && !ClientSyncController.syncData.activeEffects.isEmpty()) {
+                return spectatorplus$determineHeartTypeFromSyncedEffects(ClientSyncController.syncData.activeEffects, spectated.level().getLevelData().isHardcore());
+            } else {
+                // Fallback to spectated player (which won't have effects but will have correct hardcore mode)
+                return spectatorplus$callHeartTypeForPlayer(spectated);
+            }
+        }
+        
+        // Default case - use local player
+        return spectatorplus$callHeartTypeForPlayer(player);
+    }
+    
+    @Unique
+    private Object spectatorplus$callHeartTypeForPlayer(Player player) {
+        // Use reflection to call HeartType.forPlayer since the class isn't accessible from outside the mixin
+        try {
+            Class<?> heartTypeClass = Class.forName("net.minecraft.client.gui.Gui$HeartType");
+            java.lang.reflect.Method forPlayerMethod = heartTypeClass.getMethod("forPlayer", Player.class);
+            return forPlayerMethod.invoke(null, player);
+        } catch (Exception e) {
+            // Fallback - this shouldn't happen, but return a default
+            return spectatorplus$determineHeartTypeFromSyncedEffects(java.util.Collections.emptyMap(), player.level().getLevelData().isHardcore());
+        }
+    }
+    
+    @Unique
+    private Object spectatorplus$determineHeartTypeFromSyncedEffects(Map<Holder<MobEffect>, MobEffectInstance> effects, boolean isHardcore) {
+        try {
+            Class<?> heartTypeClass = Class.forName("net.minecraft.client.gui.Gui$HeartType");
+            
+            // Check for poison effect
+            if (effects.containsKey(MobEffects.POISON)) {
+                return isHardcore ? heartTypeClass.getField("POISONED_HARDCORE").get(null) : heartTypeClass.getField("POISONED").get(null);
+            }
+            
+            // Check for wither effect  
+            if (effects.containsKey(MobEffects.WITHER)) {
+                return isHardcore ? heartTypeClass.getField("WITHERED_HARDCORE").get(null) : heartTypeClass.getField("WITHERED").get(null);
+            }
+            
+            // Check for absorption effect
+            if (effects.containsKey(MobEffects.ABSORPTION)) {
+                return isHardcore ? heartTypeClass.getField("ABSORBING_HARDCORE").get(null) : heartTypeClass.getField("ABSORBING").get(null);
+            }
+            
+            // No special effects, return normal hearts
+            return isHardcore ? heartTypeClass.getField("HARDCORE").get(null) : heartTypeClass.getField("NORMAL").get(null);
+        } catch (Exception e) {
+            // This shouldn't happen, but handle gracefully
+            e.printStackTrace();
+            return null;
+        }
     }
 }
