@@ -13,6 +13,19 @@ workarounds:
   # when spectators suddenly teleport far away out of view distance.
   auto-teleport-on-untrack: true
 
+  # Re-attaches the spectator to their target after the target changes world (e.g. via portal or respawn).
+  reattach-on-world-change: true
+
+  # Re-attaches the spectator to their target after the target moves into an unloaded chunk or teleports a long distance.
+  reattach-on-chunk-unload: true
+
+  # Re-attaches the spectator to their target after the target entity is removed or despawns.
+  reattach-on-entity-removal: true
+
+  # Re-attaches spectators and targets after logout/login events.
+  # If enabled, the plugin will attempt to restore spectating relationships when either the spectator or the target logs out and back in.
+  reattach-on-player-logout: true
+
   # Some of these workarounds contain code that hooks into server internals, bypassing some limitations
   # of the Bukkit API. The downside to this is that it may not work on every server version, may fail.
   # If this option is enabled, some workarounds will fall-back to using the Bukkit API to work, but
