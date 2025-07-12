@@ -1,5 +1,6 @@
 package com.hpfxd.spectatorplus.fabric.sync;
 
+import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundEffectsSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundExperienceSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundHotbarSyncPacket;
@@ -23,6 +24,7 @@ public final class SyncPackets {
         PayloadTypeRegistry.playS2C().register(ClientboundScreenCursorSyncPacket.TYPE, ClientboundScreenCursorSyncPacket.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ClientboundScreenSyncPacket.TYPE, ClientboundScreenSyncPacket.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ClientboundSelectedSlotSyncPacket.TYPE, ClientboundSelectedSlotSyncPacket.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(ClientboundEffectsSyncPacket.TYPE, ClientboundEffectsSyncPacket.STREAM_CODEC);
     }
 
     private SyncPackets() {

@@ -34,15 +34,16 @@ public class SyncedInventoryScreen extends InventoryScreen {
 
     private void syncOtherItems() {
         final SyncedInventoryMenu menu = (SyncedInventoryMenu) this.menu;
-
-        final Inventory playerInventory = menu.getOwner().getInventory();
         final Inventory fakeInventory = menu.getInventory();
 
-        final EntityEquipment playerEquipment = ((InventoryAccessor) (menu.getOwner().getInventory())).getEquipment();
-        final EntityEquipment fakeEquipment = ((InventoryAccessor) (menu.getInventory())).getEquipment();
-
-        fakeEquipment.setAll(playerEquipment);
-        fakeInventory.setItem(Inventory.SLOT_OFFHAND, playerInventory.getItem(Inventory.SLOT_OFFHAND));
+        // Use synced inventory data for all slots (main, armor, offhand)
+        var syncData = com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController.syncData;
+        if (syncData != null && syncData.screen != null && syncData.screen.inventoryItems != null) {
+            var items = syncData.screen.inventoryItems;
+            for (int i = 0; i < items.size(); i++) {
+                fakeInventory.setItem(i, items.get(i));
+            }
+        }
     }
 
     @Override

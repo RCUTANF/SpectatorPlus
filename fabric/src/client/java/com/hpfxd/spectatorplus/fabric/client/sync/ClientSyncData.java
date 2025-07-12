@@ -6,11 +6,13 @@ import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
+import com.hpfxd.spectatorplus.fabric.sync.SyncedEffect;
 
 public class ClientSyncData {
     public final UUID playerId;
 
     public final NonNullList<ItemStack> hotbarItems = NonNullList.withSize(9, ItemStack.EMPTY);
+    public final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
     public int selectedHotbarSlot = -1;
     public FoodData foodData;
 
@@ -19,6 +21,8 @@ public class ClientSyncData {
     public int experienceLevel = -1;
 
     public ScreenSyncData screen;
+
+    public java.util.List<SyncedEffect> effects = java.util.Collections.emptyList();
 
     public ClientSyncData(UUID playerId) {
         this.playerId = playerId;

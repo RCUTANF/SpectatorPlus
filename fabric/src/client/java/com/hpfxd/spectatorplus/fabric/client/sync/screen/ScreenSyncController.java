@@ -56,21 +56,26 @@ public class ScreenSyncController {
         setSyncData(packet.playerId());
         syncData.setScreen();
 
-        if (syncData.screen.inventoryItems == null) {
+        if (syncData.screen.inventoryItems == null || syncData.screen.inventoryItems.size() != ClientboundInventorySyncPacket.ITEMS_LENGTH) {
             syncData.screen.inventoryItems = NonNullList.withSize(ClientboundInventorySyncPacket.ITEMS_LENGTH, ItemStack.EMPTY);
         }
 
         final ItemStack[] items = packet.items();
-        System.out.println("[SpectatorPlus] Received inventory sync packet for player: " + packet.playerId());
         for (int slot = 0; slot < items.length; slot++) {
             final ItemStack item = items[slot];
-            System.out.println("  Slot " + slot + ": " + (item == null ? "null" : item.toString()));
-
             if (item != null) {
                 syncData.screen.inventoryItems.set(slot, item);
-
                 if (syncedInventory != null) {
                     syncedInventory.setItem(slot, item);
+                }
+            }
+        }
+        // Also update global armorItems for convenience
+        if (syncData.armorItems != null && items.length >= 40) {
+            for (int slot = 36; slot < 40; slot++) {
+                final ItemStack item = items[slot];
+                if (item != null) {
+                    syncData.armorItems.set(slot - 36, item);
                 }
             }
         }
@@ -127,9 +132,11 @@ public class ScreenSyncController {
         EntityEquipment equipment = ((InventoryAccessor)spectated.getInventory()).getEquipment();
         syncedInventory = new Inventory(spectated, equipment);
 
+        // Set all inventory slots (0-39)
         for (int i = 0; i < syncData.screen.inventoryItems.size(); i++) {
             syncedInventory.setItem(i, syncData.screen.inventoryItems.get(i));
         }
+        // No direct access to armor list; setting slots 36-39 is sufficient for GUI
         return true;
     }
 }
