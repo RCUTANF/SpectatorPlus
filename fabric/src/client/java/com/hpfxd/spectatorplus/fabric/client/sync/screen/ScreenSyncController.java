@@ -61,8 +61,10 @@ public class ScreenSyncController {
         }
 
         final ItemStack[] items = packet.items();
+        System.out.println("[SpectatorPlus] Received inventory sync packet for player: " + packet.playerId());
         for (int slot = 0; slot < items.length; slot++) {
             final ItemStack item = items[slot];
+            System.out.println("  Slot " + slot + ": " + (item == null ? "null" : item.toString()));
 
             if (item != null) {
                 syncData.screen.inventoryItems.set(slot, item);

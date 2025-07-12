@@ -4,27 +4,24 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.hpfxd.spectatorplus.paper.sync.ClientboundSyncPacket;
 import com.hpfxd.spectatorplus.paper.util.SerializationUtil;
 import org.bukkit.NamespacedKey;
-import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.UUID;
+import com.hpfxd.spectatorplus.paper.effect.SyncedEffect;
 
-/**
- * inventoryItems layout:
- *   0-35: main inventory (including hotbar)
- *   36-39: armor (helmet, chestplate, leggings, boots)
- */
-public record ClientboundInventorySyncPacket(
+public record ClientboundEffectsSyncPacket(
         UUID playerId,
-        ItemStack[] inventoryItems
+        List<SyncedEffect> effects // List of effect data
 ) implements ClientboundSyncPacket {
-    // 0-35: main inventory, 36-39: armor, 40: offhand
-    public static final int ITEMS_LENGTH = 4 * 9 + 4 + 1;
-    public static final NamespacedKey ID = new NamespacedKey("spectatorplus", "inventory_sync");
+    public static final NamespacedKey ID = new NamespacedKey("spectatorplus", "effects_sync");
 
     @Override
     public void write(ByteArrayDataOutput buf) {
         SerializationUtil.writeUuid(buf, this.playerId);
-        SerializationUtil.writeItems(buf, this.inventoryItems);
+        SerializationUtil.writeVarInt(buf, effects.size());
+        for (SyncedEffect effect : effects) {
+            effect.write(buf);
+        }
     }
 
     @Override

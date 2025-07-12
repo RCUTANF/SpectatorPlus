@@ -49,4 +49,30 @@ public final class SerializationUtil {
             buf.write(itemData);
         }
     }
+    public static void writeString(ByteArrayDataOutput out, String value) {
+        byte[] bytes = value.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        writeVarInt(out, bytes.length);
+        out.write(bytes);
+    }
+
+    public static String readString(ByteArrayDataInput in) {
+        int length = readVarInt(in);
+        byte[] bytes = new byte[length];
+        in.readFully(bytes);
+        return new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    public static int readVarInt(ByteArrayDataInput in) {
+        int value = 0;
+        int position = 0;
+        byte currentByte;
+        while (true) {
+            currentByte = in.readByte();
+            value |= (currentByte & 0x7F) << position;
+            if ((currentByte & 0x80) == 0) break;
+            position += 7;
+            if (position > 35) throw new RuntimeException("VarInt too big");
+        }
+        return value;
+    }
 }

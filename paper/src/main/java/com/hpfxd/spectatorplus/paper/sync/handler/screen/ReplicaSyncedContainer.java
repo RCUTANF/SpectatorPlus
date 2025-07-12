@@ -34,21 +34,8 @@ public sealed class ReplicaSyncedContainer extends SyncedContainer permits Craft
             spectatorInventory.setItem(slot, targetInventory.getItem(slot));
         }
 
-        // Note: The Bukkit InventoryView.Property API is flawed. Each property can only apply to one InventoryType,
-        // but they should apply to multiple. Example: The COOK_TIME property should be able to be set on
-        // inventories with the types: FURNACE, BLAST_FURNACE, and SMOKER, but it only works on FURNACE.
-        // TODO could use NMS to set the properties instead of Bukkit's API, but it doesn't really matter since I think
-        //  the only type this really effects is FURNACE, which is handled as a DirectSyncedContainer anyway.
-
-        if (!this.getPropertiesFailed) {
-            try {
-                // Sync all data slots (called a "Property" in Bukkit)
-                ReflectionUtil.getContainerProperties(this.targetView).forEach(this.spectatorView::setProperty);
-            } catch (ReflectiveOperationException e) {
-                this.getPropertiesFailed = true;
-                JavaPlugin.getPlugin(SpectatorPlugin.class).getSLF4JLogger().warn("Failed to retrieve container properties for a replica container", e);
-            }
-        }
+        // Note: The Bukkit InventoryView.Property API is deprecated and removed in 1.21+. There is no way to get all properties for a container. This is a limitation in Bukkit.
+        // If you need to sync properties, you must use NMS or another workaround.
     }
 
     @Override

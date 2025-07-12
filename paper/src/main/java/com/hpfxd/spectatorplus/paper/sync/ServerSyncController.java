@@ -5,6 +5,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.hpfxd.spectatorplus.paper.SpectatorPlugin;
+import com.hpfxd.spectatorplus.paper.sync.handler.EffectsSyncHandler;
 import com.hpfxd.spectatorplus.paper.sync.handler.ExperienceSyncHandler;
 import com.hpfxd.spectatorplus.paper.sync.handler.FoodSyncHandler;
 import com.hpfxd.spectatorplus.paper.sync.handler.InventorySyncHandler;
@@ -27,6 +28,7 @@ public class ServerSyncController implements PluginMessageListener {
     private final SpectatorPlugin plugin;
     private final ScreenSyncHandler screenSyncHandler;
     private final InventorySyncHandler inventorySyncHandler;
+    private final EffectsSyncHandler effectsSyncHandler;
 
     public ServerSyncController(SpectatorPlugin plugin) {
         this.plugin = plugin;
@@ -44,9 +46,13 @@ public class ServerSyncController implements PluginMessageListener {
         this.screenSyncHandler = new ScreenSyncHandler(plugin);
         new ExperienceSyncHandler(plugin);
         new FoodSyncHandler(plugin);
+
         this.inventorySyncHandler = new InventorySyncHandler(plugin);
         new SelectedSlotSyncHandler(plugin);
         new MapSyncHandler(plugin);
+
+        this.effectsSyncHandler = new EffectsSyncHandler(plugin);
+
     }
 
     public void sendPacket(Player receiver, ClientboundSyncPacket packet) {
@@ -84,6 +90,10 @@ public class ServerSyncController implements PluginMessageListener {
 
     public InventorySyncHandler getInventorySyncHandler() {
         return this.inventorySyncHandler;
+    }
+
+    public EffectsSyncHandler getEffectsSyncHandler() {
+        return this.effectsSyncHandler;
     }
 
     @Override

@@ -24,3 +24,6 @@ permissions:
   spectatorplus.sync.screen:
     description: "Allows the player to receive the open screen of the spectated target (e.g. a chest)"
     default: true
+  spectatorplus.sync.effects:
+    description: "Allows the player to receive the active potion effects of the spectated target"
+    default: true
