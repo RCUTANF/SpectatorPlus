@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -48,7 +49,7 @@ public abstract class GameRendererMixin {
     @Unique private float yBobO;
 
     @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4fStack;popMatrix()Lorg/joml/Matrix4fStack;", remap = false))
-    public void spectatorplus$renderItemInHand(float partialTicks, boolean sleeping, Matrix4f projectionMatrix, CallbackInfo ci, @Local PoseStack poseStackIn) {
+    public void spectatorplus$renderItemInHand(float partialTicks, boolean sleeping, Matrix4f projectionMatrix, CallbackInfo ci, @Local PoseStack poseStackIn, @Local SubmitNodeCollector submitNodeCollector) {
         if (SpectatorClientMod.config.renderArms && this.minecraft.player != null && this.minecraft.options.getCameraType().isFirstPerson() && !this.minecraft.options.hideGui) {
             final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
             if (spectated != null && !spectated.isSpectator()) {
@@ -72,7 +73,7 @@ public abstract class GameRendererMixin {
 
                     accessor.invokeRenderArmWithItem(spectated, partialTicks,
                             pitch, InteractionHand.MAIN_HAND, swingProgress, accessor.getMainHandItem(), equippedProgress,
-                            poseStackIn, this.renderBuffers.bufferSource(), packedLightCoords);
+                            poseStackIn, submitNodeCollector, packedLightCoords);
                 }
 
                 if (handRenderSelection.renderOffHand) {
@@ -81,11 +82,10 @@ public abstract class GameRendererMixin {
 
                     accessor.invokeRenderArmWithItem(spectated, partialTicks,
                             pitch, InteractionHand.OFF_HAND, swingProgress, accessor.getOffHandItem(), equippedProgress,
-                            poseStackIn, this.renderBuffers.bufferSource(), packedLightCoords);
+                            poseStackIn, submitNodeCollector, packedLightCoords);
                 }
 
                 this.lightTexture.turnOffLightLayer();
-                this.renderBuffers.bufferSource().endBatch();
             }
         }
     }
