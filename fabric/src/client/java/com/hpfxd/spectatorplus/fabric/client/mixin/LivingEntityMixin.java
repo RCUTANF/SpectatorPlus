@@ -41,48 +41,6 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    // @Inject(method = "hasEffect(Lnet/minecraft/core/Holder;)Z", at = @At("HEAD"), cancellable = true)
-    // private void overrideNauseaEffect(Holder<MobEffect> effect, CallbackInfoReturnable<Boolean> cir) {
-    //     System.out.println("[SpectatorPlus] hasEffect called. Entity type: " + this.getClass().getName() + ", effect: " +
-    //         effect.value().getDescriptionId() + " player: " + this.getName().getString());
-    //     if ((Entity) this instanceof Player) {
-    //         var syncData = com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController.syncData;
-    //         if (syncData != null && syncData.effects != null) {
-    //             boolean found = syncData.effects.stream().anyMatch(synced -> {
-    //                 java.util.Optional<Holder.Reference<MobEffect>> optHolder = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.get(net.minecraft.resources.ResourceLocation.tryParse(synced.effectKey));
-    //                 return optHolder.isPresent() && optHolder.get().value().equals(effect.value());
-    //             });
-    //             if (found) {
-    //                 System.out.println("[SpectatorPlus] hasEffect: Synced effect found for player: " + this.getName().getString());
-    //                 cir.setReturnValue(true);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // @Inject(method = "getActiveEffects", at = @At("HEAD"), cancellable = true)
-    // private void overrideActiveEffects(CallbackInfoReturnable<Collection<MobEffectInstance>> cir) {
-    //     System.out.println("[SpectatorPlus] getActiveEffects called. Entity type: " + this.getClass().getName());
-    //     if ((Entity) this instanceof Player) {
-    //         System.out.println("[SpectatorPlus] Injecting effects from syncdata for player: " + this.getName().getString());
-    //         var syncData = com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController.syncData;
-    //         if (syncData != null && syncData.effects != null) {
-    //             java.util.List<MobEffectInstance> instances = new java.util.ArrayList<>();
-    //             for (com.hpfxd.spectatorplus.fabric.sync.SyncedEffect synced : syncData.effects) {
-    //                 java.util.Optional<net.minecraft.core.Holder.Reference<MobEffect>> optHolder = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.get(net.minecraft.resources.ResourceLocation.tryParse(synced.effectKey));
-    //                 if (optHolder.isPresent()) {
-    //                     MobEffect effect = optHolder.get().value();
-    //                     net.minecraft.core.Holder<MobEffect> holder = net.minecraft.core.Holder.direct(effect);
-    //                     MobEffectInstance instance = new MobEffectInstance(holder, synced.duration, synced.amplifier);
-    //                     instances.add(instance);
-    //                 }
-    //             }
-    //             System.out.println("[SpectatorPlus] Injecting synced effects for player: " + this.getName().getString() + " -> " + instances);
-    //             cir.setReturnValue(instances);
-    //         }
-    //     }
-    // }
-
     @Unique
     private boolean isBreakingBlock() {
         return ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getDestroyingBlocks().containsKey(this.getId());

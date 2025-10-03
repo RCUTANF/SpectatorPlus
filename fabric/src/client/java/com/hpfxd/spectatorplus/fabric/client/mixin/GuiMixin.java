@@ -25,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,10 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.modify.LocalVariableDiscriminator.Context.Local;
+
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
 
 @Mixin(Gui.class)
 public abstract class GuiMixin {
@@ -45,8 +49,10 @@ public abstract class GuiMixin {
     @Shadow @Final private Minecraft minecraft;
     @Shadow public abstract SpectatorGui getSpectatorGui();
     @Shadow protected abstract void renderItemHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker);
+    @Shadow protected abstract void renderPortalOverlay(GuiGraphics guiGraphics, float intensity);
 
     @Shadow @Final private SpectatorGui spectatorGui;
+
 
     // Use correct ResourceLocations for vanilla empty armor slot icons from the GUI atlas
     private static final ResourceLocation EMPTY_ARMOR_SLOT_HELMET = ResourceLocation.withDefaultNamespace("container/slot/helmet");
@@ -66,7 +72,10 @@ public abstract class GuiMixin {
         cancellable = true
     )
     private void spectatorplus$cancelRenderEffects(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        ci.cancel();
+        final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
+        if (spectated != null) {
+            ci.cancel();
+        }
     }
 
     @Redirect(method = "renderCameraOverlays(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isScoping()Z"))
@@ -122,7 +131,7 @@ public abstract class GuiMixin {
                     int itemWidth = 16; // standard item icon width
                     int itemHeight = 16; // standard item icon height
                     int baseY = 2;
-                    int baseX = this.minecraft.getWindow().getGuiScaledWidth() - itemWidth - 2;
+                    int baseX = this.minecraft.getWindow().getGuiScaledWidth() - itemWidth - 4;
                     // Armor order: helmet, chestplate, leggings, boots (reverse to boots, leggings, chestplate, helmet)
                     EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
                     for (int i = 0; i < slots.length; i++) {
@@ -140,30 +149,79 @@ public abstract class GuiMixin {
                             if (armorStack.isDamageableItem() && armorStack.getMaxDamage() > 0) {
                                 int durability = armorStack.getMaxDamage() - armorStack.getDamageValue();
                                 int percent = (int) ((durability * 100.0) / armorStack.getMaxDamage());
-                                String text = percent + "%";
+                                String numText = String.valueOf(percent);
+                                String percentChar = "%";
+                                int numColor;
+                                if (percent == 100) {
+                                    numColor = 0xFF00FF00; // lime
+                                } else if (percent < 10) {
+                                    numColor = 0xFFFF0000; // red
+                                } else if (percent < 25) {
+                                    numColor = 0xFFFFA500; // orange
+                                } else {
+                                    numColor = 0xFFFFFFFF; // white
+                                }
                                 // Right-align the text to the left of the icon
-                                int textWidth = this.minecraft.font.width(text);
+                                int numTextWidth = this.minecraft.font.width(numText);
+                                int percentTextWidth = this.minecraft.font.width(percentChar);
+                                int textWidth = numTextWidth + percentTextWidth;
                                 int textX = baseX - spacing - textWidth; // right-aligned to the left of the item
                                 int textY = y + 4; // vertically centered
-                                guiGraphics.drawString(this.minecraft.font, text, textX, textY, 0xFFFFFFFF, true);
+                                // Draw numeric part
+                                guiGraphics.drawString(this.minecraft.font, numText, textX, textY, numColor, true);
+                                // Draw '%' in white
+                                guiGraphics.drawString(this.minecraft.font, percentChar, textX + numTextWidth, textY, 0xFFFFFFFF, true);
                             }
                         }
                     }
 
-                    int effectBaseY = baseY + slots.length * (itemHeight + spacing) + 4; // start below armor
+                    int effectBaseY = baseY + slots.length * (itemHeight + spacing) + spacing; // start below armor
 
                     // Render all active effect icons down the right side below armor
-                    if (ClientSyncController.syncData.effects != null && !ClientSyncController.syncData.effects.isEmpty()) {
-
-                        for (int i = 0; i < ClientSyncController.syncData.effects.size(); i++) {
-                            SyncedEffect effect = ClientSyncController.syncData.effects.get(i);
-                            int y = effectBaseY + i * (itemWidth + spacing);
+                    LocalPlayer player = this.minecraft.player;
+                    if (player != null && player.getActiveEffects() != null && !player.getActiveEffects().isEmpty()) {
+                        int effectIndex = 0;
+                        for (var effectInstance : player.getActiveEffects()) {
+                            int y = effectBaseY + effectIndex * (itemWidth + spacing);
 
                             // Draw vanilla effect background
                             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, EFFECT_BACKGROUND_SPRITE, baseX, y, itemWidth, itemHeight);
 
-                            ResourceLocation effectIcon = GuiMixin.getEffectIcon(effect.effectKey);
-                            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, effectIcon, baseX+2, y+2, itemWidth-4, itemHeight-4);
+                            ResourceLocation effectIcon = Gui.getMobEffectSprite(effectInstance.getEffect());
+                            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, effectIcon, baseX + 2, y + 2, itemWidth - 4, itemHeight - 4);
+
+                            // Draw effect level as a small white number on the top right of the icon
+                            int level = effectInstance.getAmplifier() + 1;
+                            String levelText = String.valueOf(level);
+                            int levelTextWidth = this.minecraft.font.width(levelText);
+                            int levelTextX = baseX + itemWidth - (int)(levelTextWidth * 0.4F) - 3; // right-align inside top-right corner
+                            int levelTextY = y + 2;
+                            guiGraphics.pose().pushMatrix();
+                            guiGraphics.pose().scale(0.5F, 0.5F);
+                            guiGraphics.drawString(this.minecraft.font, levelText, (int)(levelTextX / 0.5F), (int)(levelTextY / 0.5F), 0xFFFFFFFF, true);
+                            guiGraphics.pose().popMatrix();
+
+                            // Draw duration bar (1px wide) to the left of the effect icon, color changes with percent
+                            int duration = effectInstance.getDuration();
+                            int maxDuration = 3600; // 3 minutes, adjust as needed
+                            float percent = maxDuration > 0 ? (duration / (float)maxDuration) : 1.0F;
+                            int maxBarHeight = itemHeight - 2;
+                            int barHeight = Math.min(maxBarHeight, (int)(maxBarHeight * percent));
+                            int barX = baseX + 1; // 1px left of icon
+                            int barY = y + itemHeight - 1 - barHeight; // 1px up from bottom
+                            int barColor;
+                            if (percent > 0.20F) {
+                                barColor = 0xFF00FF00; // green
+                            } else if (percent > 0.05F) {
+                                barColor = 0xFFFFA500; // orange
+                            } else {
+                                barColor = 0xFFFF0000; // red
+                            }
+                            if (barHeight > 0) {
+                                guiGraphics.fill(barX, barY, barX + 2, barY + barHeight, barColor);
+                            }
+
+                            effectIndex++;
                         }
                     }
                 }
@@ -273,6 +331,17 @@ public abstract class GuiMixin {
         return instance.getFoodData();
     }
 
+    @Redirect(
+        method = "renderFood(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/entity/player/Player;II)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;hasEffect(Lnet/minecraft/core/Holder;)Z"))
+    private boolean spectatorplus$showSyncedFoodSprite(Player instance, net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect) {
+        final LocalPlayer player = this.minecraft.player;
+        if (player != null && player.hasEffect(effect)) {
+            return true;
+        }
+        return instance.hasEffect(effect);
+    }
+
     @Redirect(method = "renderItemHotbar(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;getItem(I)Lnet/minecraft/world/item/ItemStack;"))
     private ItemStack spectatorplus$showSyncedItems(Inventory instance, int slot) {
         if (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1 && SpecUtil.getCameraPlayer(this.minecraft) != null) {
@@ -308,4 +377,5 @@ public abstract class GuiMixin {
         // The effectKey should be lowercase, matching the registry name
         return ResourceLocation.withDefaultNamespace("mob_effect/" + key.toLowerCase());
     }
+
 }

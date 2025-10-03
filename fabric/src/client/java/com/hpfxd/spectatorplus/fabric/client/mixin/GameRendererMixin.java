@@ -122,22 +122,6 @@ public abstract class GameRendererMixin {
     private void spectatorplus$tick(CallbackInfo ci) {
         final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
         if (spectated != null) {
-            // effect handling
-            // Force-add all effects from syncData.effects
-            // var syncData = com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController.syncData;
-            // if (syncData != null && syncData.effects != null && this.minecraft.player != null) {
-            //     for (com.hpfxd.spectatorplus.fabric.sync.SyncedEffect synced : syncData.effects) {
-            //         java.util.Optional<net.minecraft.core.Holder.Reference<net.minecraft.world.effect.MobEffect>> optHolder = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.get(net.minecraft.resources.ResourceLocation.tryParse(synced.effectKey));
-            //         if (optHolder.isPresent()) {
-            //             net.minecraft.world.effect.MobEffect effect = optHolder.get().value();
-            //             net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> holder = net.minecraft.core.Holder.direct(effect);
-            //             net.minecraft.world.effect.MobEffectInstance instance = new net.minecraft.world.effect.MobEffectInstance(holder, synced.duration, synced.amplifier);
-            //             this.minecraft.player.forceAddEffect(instance, this.minecraft.player);
-            //         }
-            //     }
-            // }
-
-
             // View bobbing
 
             // get horizontal distance between current and last pos
