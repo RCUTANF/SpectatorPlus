@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class SpectatorKeybinds {
-    private static final Comparator<PlayerInfo> PROFILE_ORDER = Comparator.comparing(playerInfo -> playerInfo.getProfile().getId());
+    private static final Comparator<PlayerInfo> PROFILE_ORDER = Comparator.comparing(playerInfo -> playerInfo.getProfile().id());
 
     private static KeyMapping CLOSEST_PLAYER;
     private static KeyMapping NEXT_PLAYER;
@@ -40,19 +40,19 @@ public class SpectatorKeybinds {
         CLOSEST_PLAYER = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.spectatorplus.closestPlayer",
                 GLFW.GLFW_KEY_UP,
-                "key.categories.spectatorplus"
+                KeyMapping.Category.MISC
         ));
 
         NEXT_PLAYER = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.spectatorplus.nextPlayer",
                 GLFW.GLFW_KEY_RIGHT,
-                "key.categories.spectatorplus"
+                KeyMapping.Category.MISC
         ));
 
         PREVIOUS_PLAYER = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.spectatorplus.previousPlayer",
                 GLFW.GLFW_KEY_LEFT,
-                "key.categories.spectatorplus"
+                KeyMapping.Category.MISC
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(SpectatorKeybinds::tick);
@@ -61,7 +61,7 @@ public class SpectatorKeybinds {
     private static void tick(Minecraft mc) {
         if (mc.player != null && mc.gameMode.getPlayerMode() == GameType.SPECTATOR) {
             while (CLOSEST_PLAYER.consumeClick()) {
-                final Entity nearest = mc.level.getNearestPlayer(mc.player.getX(), mc.player.getY(), mc.player.getZ(), 256, EntitySelector.NO_SPECTATORS.and(entity -> mc.cameraEntity != entity));
+                final Entity nearest = mc.level.getNearestPlayer(mc.player.getX(), mc.player.getY(), mc.player.getZ(), 256, EntitySelector.NO_SPECTATORS.and(entity -> mc.getCameraEntity() != entity));
 
                 if (nearest != null) {
                     setTarget(mc, nearest.getUUID());
@@ -85,8 +85,8 @@ public class SpectatorKeybinds {
     private static void targetNext(Minecraft mc, int shift) {
         final PlayerInfo target = shiftPlayerCursor(mc, shift);
 
-        if (target != null && !target.getProfile().getId().equals(mc.cameraEntity.getUUID())) {
-            setTarget(mc, target.getProfile().getId());
+        if (target != null && !target.getProfile().id().equals(mc.getCameraEntity().getUUID())) {
+            setTarget(mc, target.getProfile().id());
             mc.player.displayClientMessage(Component.translatable("spectatorplus.target.now-spectating", Component.empty().append(mc.gui.getTabList().getNameForDisplay(target))
                     .withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY), true);
         } else {
@@ -107,7 +107,7 @@ public class SpectatorKeybinds {
         int index = -1;
 
         if (targetCursorId != null) {
-            index = Iterables.indexOf(players, player -> targetCursorId.equals(player.getProfile().getId()));
+            index = Iterables.indexOf(players, player -> targetCursorId.equals(player.getProfile().id()));
         }
 
         if (index == -1 && shift < 0) {
@@ -134,7 +134,7 @@ public class SpectatorKeybinds {
 
     private static void selectInMenu(Minecraft mc, UUID uuid) {
         final TeleportToPlayerMenuCategory category = new TeleportToPlayerMenuCategory();
-        final SpectatorMenuItem menuItem = Iterables.find(category.getItems(), item -> item instanceof PlayerMenuItem && uuid.equals(((PlayerMenuItemAccessor) item).getProfile().getId()));
+        final SpectatorMenuItem menuItem = Iterables.find(category.getItems(), item -> item instanceof PlayerMenuItem && uuid.equals(((PlayerMenuItemAccessor) item).getProfile().id()));
 
         if (menuItem == null) {
             return;
@@ -143,7 +143,7 @@ public class SpectatorKeybinds {
         final SpectatorGui gui = mc.gui.getSpectatorGui();
         if (!gui.isMenuActive()) {
             // Activate the menu
-            gui.onMouseMiddleClick();
+            // gui.onMouseMiddleClick();
         }
 
         final SpectatorMenu menu = ((SpectatorGuiAccessor) gui).getMenu();
