@@ -97,7 +97,7 @@ public abstract class ItemInHandRendererMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;getRenderer(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/client/renderer/entity/EntityRenderer;")
     )
     private <T extends Entity> EntityRenderer<? super T, ?> spectatorplus$mapHandUseCameraEntityRenderer(EntityRenderDispatcher instance, T entity) {
-        return instance.getRenderer(this.minecraft.cameraEntity);
+        return instance.getRenderer(this.minecraft.getCameraEntity());
     }
 
     @Redirect(
@@ -105,7 +105,7 @@ public abstract class ItemInHandRendererMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isModelPartShown(Lnet/minecraft/world/entity/player/PlayerModelPart;)Z")
     )
     private boolean spectatorplus$mapHandFixPartVisibility(LocalPlayer instance, PlayerModelPart playerModelPart) {
-        return ((Player) this.minecraft.cameraEntity).isModelPartShown(playerModelPart);
+        return ((Player) this.minecraft.getCameraEntity()).isModelPartShown(playerModelPart);
     }
 
     @Redirect(method = {
@@ -113,6 +113,6 @@ public abstract class ItemInHandRendererMixin {
             "renderTwoHandedMap(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IFFF)V",
     }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isInvisible()Z"))
     private boolean spectatorplus$spectatedInvisibility(LocalPlayer instance) {
-        return this.minecraft.cameraEntity.isInvisible();
+        return this.minecraft.getCameraEntity().isInvisible();
     }
 }

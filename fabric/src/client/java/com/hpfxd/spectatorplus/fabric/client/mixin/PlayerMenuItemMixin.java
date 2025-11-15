@@ -20,7 +20,7 @@ public class PlayerMenuItemMixin {
     @Inject(method = "selectItem(Lnet/minecraft/client/gui/spectator/SpectatorMenu;)V", at = @At("HEAD"), cancellable = true)
     private void spectatorplus$handleSelect(SpectatorMenu menu, CallbackInfo ci) {
         if (SpectatorClientMod.config.teleportAutoSpectate) {
-            ClientTargetController.requestTargetFromServer(Minecraft.getInstance(), this.profile.getId());
+            ClientTargetController.requestTargetFromServer(Minecraft.getInstance(), this.profile.id());
             ci.cancel();
         }
     }
