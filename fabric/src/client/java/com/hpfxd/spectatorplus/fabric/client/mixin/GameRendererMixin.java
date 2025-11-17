@@ -7,11 +7,11 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.core.Direction;
@@ -48,7 +48,7 @@ public abstract class GameRendererMixin {
     @Unique private float yBobO;
 
     @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4fStack;popMatrix()Lorg/joml/Matrix4fStack;", remap = false))
-    public void spectatorplus$renderItemInHand(float partialTicks, boolean sleeping, Matrix4f projectionMatrix, CallbackInfo ci, @Local PoseStack poseStackIn) {
+    public void spectatorplus$renderItemInHand(float partialTicks, boolean sleeping, Matrix4f projectionMatrix, CallbackInfo ci, @Local PoseStack poseStackIn, @Local SubmitNodeCollector submitNodeCollector) {
         if (SpectatorClientMod.config.renderArms && this.minecraft.player != null && this.minecraft.options.getCameraType().isFirstPerson() && !this.minecraft.options.hideGui) {
             final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
             if (spectated != null && !spectated.isSpectator()) {
@@ -70,18 +70,18 @@ public abstract class GameRendererMixin {
                     final float swingProgress = interactionHand == InteractionHand.MAIN_HAND ? attackAnim : 0.0F;
                     final float equippedProgress = 1F - Mth.lerp(partialTicks, accessor.getOMainHandHeight(), accessor.getMainHandHeight());
 
-                    accessor.invokeRenderArmWithItem(spectated, partialTicks,
+                        accessor.invokeRenderArmWithItem(spectated, partialTicks,
                             pitch, InteractionHand.MAIN_HAND, swingProgress, accessor.getMainHandItem(), equippedProgress,
-                            poseStackIn, this.renderBuffers.bufferSource(), packedLightCoords);
+                            poseStackIn, submitNodeCollector, packedLightCoords);
                 }
 
                 if (handRenderSelection.renderOffHand) {
                     final float swingProgress = interactionHand == InteractionHand.OFF_HAND ? attackAnim : 0.0F;
                     final float equippedProgress = 1F - Mth.lerp(partialTicks, accessor.getOOffHandHeight(), accessor.getOffHandHeight());
 
-                    accessor.invokeRenderArmWithItem(spectated, partialTicks,
+                        accessor.invokeRenderArmWithItem(spectated, partialTicks,
                             pitch, InteractionHand.OFF_HAND, swingProgress, accessor.getOffHandItem(), equippedProgress,
-                            poseStackIn, this.renderBuffers.bufferSource(), packedLightCoords);
+                            poseStackIn, submitNodeCollector, packedLightCoords);
                 }
 
                 this.lightTexture.turnOffLightLayer();

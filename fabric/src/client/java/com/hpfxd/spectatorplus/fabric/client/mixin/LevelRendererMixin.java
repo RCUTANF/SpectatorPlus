@@ -33,14 +33,14 @@ public abstract class LevelRendererMixin {
         }
     }
 
-    @Inject(
-            method = "renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    private void spectatorplus$hideOtherSpectators(Entity entity, double camX, double camY, double camZ, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, CallbackInfo ci) {
-        if (!SpectatorClientMod.config.showSpectators && this.minecraft.player.isSpectator() && entity instanceof final RemotePlayer player && player.isSpectator()) {
-            ci.cancel();
-        }
-    }
+    // @Inject(
+    //         method = "renderEntity(Lnet/minecraft/world/entity/Entity;DDDFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;)V",
+    //         at = @At("HEAD"),
+    //         cancellable = true
+    // )
+    // private void spectatorplus$hideOtherSpectators(Entity entity, double camX, double camY, double camZ, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, CallbackInfo ci) {
+    //     if (!SpectatorClientMod.config.showSpectators && this.minecraft.player.isSpectator() && entity instanceof final RemotePlayer player && player.isSpectator()) {
+    //         ci.cancel();
+    //     }
+    // }
 }

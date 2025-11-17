@@ -5,8 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -80,7 +79,7 @@ public abstract class ItemInHandRendererMixin {
         }
     }
 
-    @ModifyVariable(method = "renderPlayerArm(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IFFLnet/minecraft/world/entity/HumanoidArm;)V", at = @At("STORE"))
+    @ModifyVariable(method = "renderPlayerArm(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IFFLnet/minecraft/world/entity/HumanoidArm;)V", at = @At("STORE"))
     private AbstractClientPlayer setArmPlayer(AbstractClientPlayer in) {
         // render the arm as the camera entity, instead of always as the client player
 
@@ -93,26 +92,38 @@ public abstract class ItemInHandRendererMixin {
     }
 
     @Redirect(
-            method = "renderMapHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/HumanoidArm;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;getRenderer(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/client/renderer/entity/EntityRenderer;")
+            method = "renderMapHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/world/entity/HumanoidArm;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;getPlayerRenderer(Lnet/minecraft/client/player/AbstractClientPlayer;)Lnet/minecraft/client/renderer/entity/player/AvatarRenderer;")
     )
-    private <T extends Entity> EntityRenderer<? super T, ?> spectatorplus$mapHandUseCameraEntityRenderer(EntityRenderDispatcher instance, T entity) {
-        return instance.getRenderer(this.minecraft.getCameraEntity());
+    private AvatarRenderer<AbstractClientPlayer> spectatorplus$mapHandUseCameraAvatarRenderer(net.minecraft.client.renderer.entity.EntityRenderDispatcher dispatcher, AbstractClientPlayer ignoredPlayer) {
+        Entity cameraEntity = this.minecraft.getCameraEntity();
+        if (cameraEntity instanceof AbstractClientPlayer cameraPlayer) {
+            return dispatcher.getPlayerRenderer(cameraPlayer);
+        }
+        return dispatcher.getPlayerRenderer(this.minecraft.player);
     }
 
     @Redirect(
-            method = "renderMapHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/HumanoidArm;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isModelPartShown(Lnet/minecraft/world/entity/player/PlayerModelPart;)Z")
+            method = "renderMapHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/world/entity/HumanoidArm;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;isModelPartShown(Lnet/minecraft/world/entity/player/PlayerModelPart;)Z")
     )
-    private boolean spectatorplus$mapHandFixPartVisibility(LocalPlayer instance, PlayerModelPart playerModelPart) {
-        return ((Player) this.minecraft.getCameraEntity()).isModelPartShown(playerModelPart);
+    private boolean spectatorplus$mapHandFixPartVisibility(AbstractClientPlayer instance, PlayerModelPart playerModelPart) {
+        Entity cameraEntity = this.minecraft.getCameraEntity();
+        if (cameraEntity instanceof Player cameraPlayer) {
+            return cameraPlayer.isModelPartShown(playerModelPart);
+        }
+        return instance.isModelPartShown(playerModelPart);
     }
 
     @Redirect(method = {
-            "renderOneHandedMap(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IFLnet/minecraft/world/entity/HumanoidArm;FLnet/minecraft/world/item/ItemStack;)V",
-            "renderTwoHandedMap(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IFFF)V",
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isInvisible()Z"))
-    private boolean spectatorplus$spectatedInvisibility(LocalPlayer instance) {
-        return this.minecraft.getCameraEntity().isInvisible();
+            "renderOneHandedMap(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IFLnet/minecraft/world/entity/HumanoidArm;FLnet/minecraft/world/item/ItemStack;)V",
+            "renderTwoHandedMap(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IFFF)V",
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;isInvisible()Z"))
+    private boolean spectatorplus$spectatedInvisibility(AbstractClientPlayer instance) {
+        Entity cameraEntity = this.minecraft.getCameraEntity();
+        if (cameraEntity instanceof net.minecraft.world.entity.Entity entity) {
+            return entity.isInvisible();
+        }
+        return instance.isInvisible();
     }
 }

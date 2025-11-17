@@ -134,7 +134,7 @@ public class SpectatorKeybinds {
 
     private static void selectInMenu(Minecraft mc, UUID uuid) {
         final TeleportToPlayerMenuCategory category = new TeleportToPlayerMenuCategory();
-        final SpectatorMenuItem menuItem = Iterables.find(category.getItems(), item -> item instanceof PlayerMenuItem && uuid.equals(((PlayerMenuItemAccessor) item).getProfile().id()));
+        final SpectatorMenuItem menuItem = Iterables.find(category.getItems(), item -> item instanceof PlayerMenuItem && uuid.equals(((PlayerMenuItemAccessor) item).getPlayerInfo().getProfile().id()));
 
         if (menuItem == null) {
             return;
