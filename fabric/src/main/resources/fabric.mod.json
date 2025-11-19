@@ -51,13 +51,13 @@
   ],
   "depends": {
     "fabricloader": ">=0.15.0",
-    "minecraft": "~1.21.6",
+    "minecraft": "~1.21.10",
     "java": ">=21",
     "fabric-api": "*",
     "fabric-permissions-api-v0": "*"
   },
   "suggests": {
     "cloth-config": "^19.0.147",
-    "modmenu": "^15.0.0-beta.3"
+    "modmenu": "^16.0.0-rc.1"
   }
 }

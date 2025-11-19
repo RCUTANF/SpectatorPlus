@@ -8,12 +8,9 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.ClientAvatarState;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.*;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -27,6 +24,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
@@ -48,7 +46,7 @@ public abstract class GameRendererMixin {
     @Unique private float yBobO;
 
     @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4fStack;popMatrix()Lorg/joml/Matrix4fStack;", remap = false))
-    public void spectatorplus$renderItemInHand(float partialTicks, boolean sleeping, Matrix4f projectionMatrix, CallbackInfo ci, @Local PoseStack poseStackIn, @Local SubmitNodeCollector submitNodeCollector) {
+    public void spectatorplus$renderItemInHand(float partialTicks, boolean sleeping, Matrix4f projectionMatrix, CallbackInfo ci, @Local PoseStack poseStackIn) {
         if (SpectatorClientMod.config.renderArms && this.minecraft.player != null && this.minecraft.options.getCameraType().isFirstPerson() && !this.minecraft.options.hideGui) {
             final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
             if (spectated != null && !spectated.isSpectator()) {
@@ -65,6 +63,7 @@ public abstract class GameRendererMixin {
                 final int packedLightCoords = this.minecraft.getEntityRenderDispatcher().getPackedLightCoords(spectated, partialTicks);
 
                 final ItemInHandRendererAccessor accessor = ((ItemInHandRendererAccessor) this.itemInHandRenderer);
+                var submitNodeCollector = minecraft.gameRenderer.getSubmitNodeStorage();
 
                 if (handRenderSelection.renderMainHand) {
                     final float swingProgress = interactionHand == InteractionHand.MAIN_HAND ? attackAnim : 0.0F;
@@ -150,24 +149,17 @@ public abstract class GameRendererMixin {
         }
     }
 
-    @ModifyExpressionValue(method = "bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/AbstractClientPlayer;walkDist:F"))
-    private float spectatorplus$modifyBobWalkDist(float original, @Local AbstractClientPlayer cameraPlayer) {
-        return cameraPlayer == this.minecraft.player ? original : this.walkDist;
+    @Redirect(method = "bobView", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/ClientAvatarState;getBackwardsInterpolatedWalkDistance(F)F"))
+    float spectatorplus$modifyBobWalkDist(ClientAvatarState instance, float partialTick) {
+        if (minecraft.getCameraEntity() == this.minecraft.player) return instance.getBackwardsInterpolatedWalkDistance(partialTick);
+        float f = this.walkDist - this.walkDistO;
+        return -(this.walkDist + f * partialTick);
     }
 
-    @ModifyExpressionValue(method = "bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/AbstractClientPlayer;walkDistO:F"))
-    private float spectatorplus$modifyBobWalkDistO(float original, @Local AbstractClientPlayer cameraPlayer) {
-        return cameraPlayer == this.minecraft.player ? original : this.walkDistO;
-    }
-
-    @ModifyExpressionValue(method = "bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/AbstractClientPlayer;bob:F"))
-    private float spectatorplus$modifyBobValue(float original, @Local AbstractClientPlayer cameraPlayer) {
-        return cameraPlayer == this.minecraft.player ? original : this.bob;
-    }
-
-    @ModifyExpressionValue(method = "bobView(Lcom/mojang/blaze3d/vertex/PoseStack;F)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/AbstractClientPlayer;oBob:F"))
-    private float spectatorplus$modifyBobValueO(float original, @Local AbstractClientPlayer cameraPlayer) {
-        return cameraPlayer == this.minecraft.player ? original : this.bobO;
+    @Redirect(method = "bobView", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/entity/ClientAvatarState;getInterpolatedBob(F)F"))
+    float spectatorplus$modifyBobValue(ClientAvatarState instance, float partialTick) {
+        if (minecraft.getCameraEntity() == this.minecraft.player) return instance.getInterpolatedBob(partialTick);
+        return Mth.lerp(partialTick, this.bobO, this.bob);
     }
 
     @ModifyExpressionValue(method = "pick(F)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;blockInteractionRange()D"))

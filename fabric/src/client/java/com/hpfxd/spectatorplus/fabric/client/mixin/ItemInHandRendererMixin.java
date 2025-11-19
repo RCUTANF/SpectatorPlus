@@ -103,11 +103,11 @@ public abstract class ItemInHandRendererMixin {
         return dispatcher.getPlayerRenderer(this.minecraft.player);
     }
 
-    @Redirect(
+        @Redirect(
             method = "renderMapHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/world/entity/HumanoidArm;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;isModelPartShown(Lnet/minecraft/world/entity/player/PlayerModelPart;)Z")
-    )
-    private boolean spectatorplus$mapHandFixPartVisibility(AbstractClientPlayer instance, PlayerModelPart playerModelPart) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isModelPartShown(Lnet/minecraft/world/entity/player/PlayerModelPart;)Z")
+        )
+        private boolean spectatorplus$mapHandFixPartVisibility(LocalPlayer instance, PlayerModelPart playerModelPart) {
         Entity cameraEntity = this.minecraft.getCameraEntity();
         if (cameraEntity instanceof Player cameraPlayer) {
             return cameraPlayer.isModelPartShown(playerModelPart);
@@ -115,11 +115,11 @@ public abstract class ItemInHandRendererMixin {
         return instance.isModelPartShown(playerModelPart);
     }
 
-    @Redirect(method = {
+        @Redirect(method = {
             "renderOneHandedMap(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IFLnet/minecraft/world/entity/HumanoidArm;FLnet/minecraft/world/item/ItemStack;)V",
             "renderTwoHandedMap(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IFFF)V",
-    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;isInvisible()Z"))
-    private boolean spectatorplus$spectatedInvisibility(AbstractClientPlayer instance) {
+        }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isInvisible()Z"))
+        private boolean spectatorplus$spectatedInvisibility(LocalPlayer instance) {
         Entity cameraEntity = this.minecraft.getCameraEntity();
         if (cameraEntity instanceof net.minecraft.world.entity.Entity entity) {
             return entity.isInvisible();

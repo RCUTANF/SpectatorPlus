@@ -1,12 +1,10 @@
 package com.hpfxd.spectatorplus.fabric.client.util;
 
-import com.hpfxd.spectatorplus.fabric.client.SpectatorClientMod;
 import com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.GameType;
-import org.spongepowered.asm.mixin.Unique;
 import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 
