@@ -42,32 +42,30 @@ public class ClientSyncController {
 
     private static void handle(ClientboundEffectsSyncPacket packet, ClientPlayNetworking.Context context) {
         setSyncData(packet.playerId());
-        syncData.effects = packet.effects(); // Now List<SyncedEffect>
-        System.out.println("[SpectatorPlus] Synced effects: " + syncData.effects);
+        syncData.effects = packet.effects();
 
-        // var client = Minecraft.getInstance();
-        // if (client.player != null) {
-        //     // Remove all current effects from the client player
-        //     List<Holder<MobEffect>> toRemove = new ArrayList<>(client.player.getActiveEffectsMap().keySet());
-        //     for (Holder<MobEffect> effect : toRemove) {
-        //         System.out.println("[SpectatorPlus] Removing effect: " + BuiltInRegistries.MOB_EFFECT.getKey(effect.value()));
-        //         client.player.removeEffect(effect);
-        //     }
-        //     // Add all synced effects to the client player
-        //     for (SyncedEffect synced : syncData.effects) {
-        //         System.out.println("[SpectatorPlus] Syncing effect: " + synced.effectKey + " duration=" + synced.duration + " amplifier=" + synced.amplifier);
-        //         java.util.Optional<Holder.Reference<MobEffect>> optHolder = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.tryParse(synced.effectKey));
-        //         if (optHolder.isPresent()) {
-        //             MobEffect effect = optHolder.get().value();
-        //             Holder<MobEffect> holder = Holder.direct(effect);
-        //             MobEffectInstance instance = new MobEffectInstance(holder, synced.duration, synced.amplifier);
-        //             client.player.forceAddEffect(instance, client.player);
-        //             System.out.println("[SpectatorPlus] Added effect: " + synced.effectKey);
-        //         } else {
-        //             System.out.println("[SpectatorPlus] Effect not found in registry: " + synced.effectKey);
-        //         }
-        //     }
-        // }
+        var client = Minecraft.getInstance();
+        if (client.player != null) {
+            // 移除客户端玩家当前的所有效果
+            List<Holder<MobEffect>> toRemove = new ArrayList<>(client.player.getActiveEffectsMap().keySet());
+            for (Holder<MobEffect> effect : toRemove) {
+                client.player.removeEffect(effect);
+            }
+
+            // 添加所有同步的效果到客户端玩家
+            for (SyncedEffect synced : syncData.effects) {
+                ResourceLocation effectLocation = ResourceLocation.tryParse(synced.effectKey);
+                if (effectLocation != null) {
+                    java.util.Optional<Holder.Reference<MobEffect>> optHolder = BuiltInRegistries.MOB_EFFECT.get(effectLocation);
+                    if (optHolder.isPresent()) {
+                        MobEffect effect = optHolder.get().value();
+                        Holder<MobEffect> holder = optHolder.get();
+                        MobEffectInstance instance = new MobEffectInstance(holder, synced.duration, synced.amplifier);
+                        client.player.forceAddEffect(instance, client.player);
+                    }
+                }
+            }
+        }
     }
 
     private static void handle(ClientboundExperienceSyncPacket packet, ClientPlayNetworking.Context context) {
