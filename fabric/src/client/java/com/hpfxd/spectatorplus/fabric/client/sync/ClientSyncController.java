@@ -1,6 +1,7 @@
 package com.hpfxd.spectatorplus.fabric.client.sync;
 
 import com.hpfxd.spectatorplus.fabric.client.sync.screen.ScreenSyncController;
+import com.hpfxd.spectatorplus.fabric.client.util.EffectUtil;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundExperienceSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundHotbarSyncPacket;
@@ -43,29 +44,7 @@ public class ClientSyncController {
     private static void handle(ClientboundEffectsSyncPacket packet, ClientPlayNetworking.Context context) {
         setSyncData(packet.playerId());
         syncData.effects = packet.effects();
-
-        var client = Minecraft.getInstance();
-        if (client.player != null) {
-            // 移除客户端玩家当前的所有效果
-            List<Holder<MobEffect>> toRemove = new ArrayList<>(client.player.getActiveEffectsMap().keySet());
-            for (Holder<MobEffect> effect : toRemove) {
-                client.player.removeEffect(effect);
-            }
-
-            // 添加所有同步的效果到客户端玩家
-            for (SyncedEffect synced : syncData.effects) {
-                ResourceLocation effectLocation = ResourceLocation.tryParse(synced.effectKey);
-                if (effectLocation != null) {
-                    java.util.Optional<Holder.Reference<MobEffect>> optHolder = BuiltInRegistries.MOB_EFFECT.get(effectLocation);
-                    if (optHolder.isPresent()) {
-                        MobEffect effect = optHolder.get().value();
-                        Holder<MobEffect> holder = optHolder.get();
-                        MobEffectInstance instance = new MobEffectInstance(holder, synced.duration, synced.amplifier);
-                        client.player.forceAddEffect(instance, client.player);
-                    }
-                }
-            }
-        }
+        EffectUtil.updateEffectInstances(packet.effects());
     }
 
     private static void handle(ClientboundExperienceSyncPacket packet, ClientPlayNetworking.Context context) {

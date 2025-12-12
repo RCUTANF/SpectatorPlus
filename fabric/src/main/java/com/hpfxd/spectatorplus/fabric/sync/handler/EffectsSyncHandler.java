@@ -4,10 +4,9 @@ import com.hpfxd.spectatorplus.fabric.sync.ServerSyncController;
 import com.hpfxd.spectatorplus.fabric.sync.SyncedEffect;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundEffectsSyncPacket;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 
@@ -18,31 +17,43 @@ public class EffectsSyncHandler {
 
     public static void init() {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> EFFECTS.remove(handler.getPlayer().getUUID()));
-
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> EFFECTS.clear());
-
-        ServerTickEvents.END_WORLD_TICK.register(EffectsSyncHandler::tick);
     }
 
-    private static void tick(ServerLevel level) {
-        for (final ServerPlayer player : level.players()) {
-            final List<SyncedEffect> cachedEffects = EFFECTS.computeIfAbsent(player.getUUID(), k -> new ArrayList<>());
+    // 当玩家开始旁观另一个玩家时调用
+    public static void onStartSpectating(ServerPlayer spectator, ServerPlayer target) {
+        syncPlayerEffects(spectator, target);
+    }
 
-            final List<SyncedEffect> currentEffects = new ArrayList<>();
-            for (MobEffectInstance effectInstance : player.getActiveEffects()) {
-                String effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effectInstance.getEffect().value()).toString();
-                currentEffects.add(new SyncedEffect(
-                    effectKey,
-                    effectInstance.getAmplifier(),
-                    effectInstance.getDuration()
-                ));
-            }
+    // 当玩家的药水效果改变时调用
+    public static void onEffectChanged(ServerPlayer player) {
+        // 获取所有正在旁观此玩家的观察者
+        for (ServerPlayer spectator : ServerSyncController.getSpectators(player)) {
+            syncPlayerEffects(spectator, player);
+        }
+    }
 
-            if (!effectsEqual(currentEffects, cachedEffects)) {
-                cachedEffects.clear();
-                cachedEffects.addAll(currentEffects);
+    private static void syncPlayerEffects(ServerPlayer spectator, ServerPlayer target) {
+        final List<SyncedEffect> currentEffects = new ArrayList<>();
+        for (MobEffectInstance effectInstance : target.getActiveEffects()) {
+            String effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effectInstance.getEffect().value()).toString();
+            currentEffects.add(new SyncedEffect(
+                effectKey,
+                effectInstance.getAmplifier(),
+                effectInstance.getDuration()
+            ));
+        }
 
-                ServerSyncController.broadcastPacketToSpectators(player, new ClientboundEffectsSyncPacket(player.getUUID(), new ArrayList<>(currentEffects)));
+        final List<SyncedEffect> cachedEffects = EFFECTS.computeIfAbsent(spectator.getUUID(), k -> new ArrayList<>());
+
+        if (!effectsEqual(currentEffects, cachedEffects)) {
+            cachedEffects.clear();
+            cachedEffects.addAll(currentEffects);
+
+            // 使用ServerPlayNetworking发送包
+            ClientboundEffectsSyncPacket packet = new ClientboundEffectsSyncPacket(target.getUUID(), new ArrayList<>(currentEffects));
+            if (packet.canSend(spectator)) {
+                ServerPlayNetworking.send(spectator, packet);
             }
         }
     }

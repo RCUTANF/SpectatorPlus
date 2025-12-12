@@ -178,20 +178,19 @@ public abstract class GuiMixin {
                     int effectBaseY = baseY + slots.length * (itemHeight + spacing) + spacing; // start below armor
 
                     // Render all active effect icons down the right side below armor
-                    LocalPlayer player = this.minecraft.player;
-                    if (player != null && player.getActiveEffects() != null && !player.getActiveEffects().isEmpty()) {
+                    if (ClientSyncController.syncData.effects != null && !ClientSyncController.syncData.effects.isEmpty()) {
                         int effectIndex = 0;
-                        for (var effectInstance : player.getActiveEffects()) {
+                        for (var effectInstance : ClientSyncController.syncData.effects) {
                             int y = effectBaseY + effectIndex * (itemWidth + spacing);
 
                             // Draw vanilla effect background
                             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, EFFECT_BACKGROUND_SPRITE, baseX, y, itemWidth, itemHeight);
 
-                            ResourceLocation effectIcon = Gui.getMobEffectSprite(effectInstance.getEffect());
+                            ResourceLocation effectIcon = GuiMixin.getEffectIcon(effectInstance.effectKey);
                             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, effectIcon, baseX + 2, y + 2, itemWidth - 4, itemHeight - 4);
 
                             // Draw effect level as a small white number on the top right of the icon
-                            int level = effectInstance.getAmplifier() + 1;
+                            int level = effectInstance.amplifier + 1;
                             String levelText = String.valueOf(level);
                             int levelTextWidth = this.minecraft.font.width(levelText);
                             int levelTextX = baseX + itemWidth - (int)(levelTextWidth * 0.4F) - 3; // right-align inside top-right corner
@@ -202,7 +201,7 @@ public abstract class GuiMixin {
                             guiGraphics.pose().popMatrix();
 
                             // Draw duration bar (1px wide) to the left of the effect icon, color changes with percent
-                            int duration = effectInstance.getDuration();
+                            int duration = effectInstance.duration;
                             int maxDuration = 3600; // 3 minutes, adjust as needed
                             float percent = maxDuration > 0 ? (duration / (float)maxDuration) : 1.0F;
                             int maxBarHeight = itemHeight - 2;
