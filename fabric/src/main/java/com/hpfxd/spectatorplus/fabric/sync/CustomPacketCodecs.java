@@ -4,6 +4,7 @@ import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public final class CustomPacketCodecs {
     private CustomPacketCodecs() {
@@ -14,7 +15,7 @@ public final class CustomPacketCodecs {
         final ItemStack[] items = new ItemStack[len];
 
         for (int slot = 0; slot < len; slot++) {
-            items[slot] = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
+            items[slot] = buf.readBoolean() ? ItemStack.OPTIONAL_STREAM_CODEC.decode(buf) : null;
         }
 
         return items;
@@ -24,7 +25,10 @@ public final class CustomPacketCodecs {
         buf.writeInt(items.length);
 
         for (final ItemStack item : items) {
-            ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, item != null ? item : ItemStack.EMPTY);
+            buf.writeBoolean(item != null);
+            if (item != null) {
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, item);
+            }
         }
     }
 
@@ -36,9 +40,10 @@ public final class CustomPacketCodecs {
         }
     }
 
-    public static void writeItem(RegistryFriendlyByteBuf buf, ItemStack item) {
+
+    public static void writeItem(RegistryFriendlyByteBuf buf, @NotNull ItemStack item) {
         try {
-            ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, item != null ? item : ItemStack.EMPTY);
+            ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, item);
         } catch (Exception e) {
             throw new EncoderException("Failed to write ItemStack", e);
         }
