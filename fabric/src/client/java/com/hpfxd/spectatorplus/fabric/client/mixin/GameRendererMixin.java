@@ -14,10 +14,14 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.animal.CowVariant;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,6 +48,18 @@ public abstract class GameRendererMixin {
     @Unique private float yBob;
     @Unique private float xBobO;
     @Unique private float yBobO;
+
+    @Redirect(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Matrix4fc;)V", ordinal = 0))
+    private void redirectMulPose(PoseStack poseStack, Matrix4fc matrix) {
+        // In spectator mode, the projection matrix contains rotation data from the spectated player,
+        // while arm rendering calculations are based on the localPlayer's viewpoint.
+        // We must skip this mulPose operation when spectating to avoid rendering arms with incorrect orientation.
+        if (this.minecraft.player == null
+                || this.minecraft.player.gameMode() != GameType.SPECTATOR
+                || !this.minecraft.options.getCameraType().isFirstPerson()) {
+            poseStack.mulPose(matrix);
+        }
+    }
 
     @Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lorg/joml/Matrix4fStack;popMatrix()Lorg/joml/Matrix4fStack;", remap = false))
     public void spectatorplus$renderItemInHand(float partialTicks, boolean sleeping, Matrix4f projectionMatrix, CallbackInfo ci, @Local PoseStack poseStackIn) {
