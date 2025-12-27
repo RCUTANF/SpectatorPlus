@@ -52,6 +52,10 @@ public abstract class GameRendererMixin {
             if (spectated != null && !spectated.isSpectator()) {
                 this.lightTexture.turnOnLightLayer();
 
+                // Reset the pose stack to identity for proper first-person rendering
+                poseStackIn.pushPose();
+                poseStackIn.setIdentity();
+
                 float attackAnim = spectated.getAttackAnim(partialTicks);
                 final InteractionHand interactionHand = MoreObjects.firstNonNull(spectated.swingingArm, InteractionHand.MAIN_HAND);
                 float pitch = Mth.lerp(partialTicks, spectated.xRotO, spectated.getXRot());
@@ -82,6 +86,8 @@ public abstract class GameRendererMixin {
                             pitch, InteractionHand.OFF_HAND, swingProgress, accessor.getOffHandItem(), equippedProgress,
                             poseStackIn, submitNodeCollector, packedLightCoords);
                 }
+
+                poseStackIn.popPose();
 
                 this.lightTexture.turnOffLightLayer();
                 this.renderBuffers.bufferSource().endBatch();
