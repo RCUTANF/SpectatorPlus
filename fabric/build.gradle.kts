@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.11.7"
+    id("fabric-loom") version "1.14-SNAPSHOT"
     id("spectatorplus.platform")
 }
 
@@ -32,7 +32,6 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-${property("parchment_minecraft_version")}:${property("parchment_version")}@zip")
     })
-
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 
     include(modImplementation("me.lucko:fabric-permissions-api:${property("fabric_permissions_api_version")}")!!)

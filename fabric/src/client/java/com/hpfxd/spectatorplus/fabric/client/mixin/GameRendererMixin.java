@@ -50,7 +50,7 @@ public abstract class GameRendererMixin {
         if (SpectatorClientMod.config.renderArms && this.minecraft.player != null && this.minecraft.options.getCameraType().isFirstPerson() && !this.minecraft.options.hideGui) {
             final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
             if (spectated != null && !spectated.isSpectator()) {
-                this.lightTexture.turnOnLightLayer();
+                //this.lightTexture.turnOnLightLayer();
 
                 // Reset the pose stack to identity for proper first-person rendering
                 poseStackIn.pushPose();
@@ -89,7 +89,7 @@ public abstract class GameRendererMixin {
 
                 poseStackIn.popPose();
 
-                this.lightTexture.turnOffLightLayer();
+                //this.lightTexture.turnOffLightLayer();
                 this.renderBuffers.bufferSource().endBatch();
             }
         }

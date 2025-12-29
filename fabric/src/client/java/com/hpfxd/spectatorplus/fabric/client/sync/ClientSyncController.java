@@ -11,7 +11,7 @@ import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundEffectsSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.SyncedEffect;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
@@ -56,7 +56,7 @@ public class ClientSyncController {
         //     // Add all synced effects to the client player
         //     for (SyncedEffect synced : syncData.effects) {
         //         System.out.println("[SpectatorPlus] Syncing effect: " + synced.effectKey + " duration=" + synced.duration + " amplifier=" + synced.amplifier);
-        //         java.util.Optional<Holder.Reference<MobEffect>> optHolder = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.tryParse(synced.effectKey));
+        //         java.util.Optional<Holder.Reference<MobEffect>> optHolder = BuiltInRegistries.MOB_EFFECT.get(Identifier.tryParse(synced.effectKey));
         //         if (optHolder.isPresent()) {
         //             MobEffect effect = optHolder.get().value();
         //             Holder<MobEffect> holder = Holder.direct(effect);
