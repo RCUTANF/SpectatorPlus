@@ -1,6 +1,6 @@
 plugins {
     id("spectatorplus.platform")
-    id("io.github.goooler.shadow") version "8.1.7"
+    id("io.github.goooler.shadow") version "8.1.8"
     id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
@@ -32,13 +32,18 @@ tasks {
     }
 
     shadowJar {
-        enabled = false
+        archiveVersion = getByName<Jar>("jar").archiveVersion
+        archiveClassifier.set("")
+        from("../LICENSE")
+
+//        listOf(
+//            "xyz.jpenilla.reflectionremapper",
+//            "net.fabricmc.mappingio",
+//        ).forEach { relocate(it, "com.hpfxd.spectatorplus.paper.libs.$it") }
     }
 
     jar {
-        enabled = true
-        archiveClassifier.set("")
-        from("../LICENSE")
+        enabled = false // only output shadow jar
     }
 
     runServer {

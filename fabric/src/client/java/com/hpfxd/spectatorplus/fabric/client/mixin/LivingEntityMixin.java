@@ -3,11 +3,7 @@ package com.hpfxd.spectatorplus.fabric.client.mixin;
 import com.hpfxd.spectatorplus.fabric.client.util.SpecUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.core.Holder;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,15 +11,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 
-import java.util.Collection;
-
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -52,6 +44,9 @@ public abstract class LivingEntityMixin extends Entity {
             return false;
         }
 
-        return ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).invokePick(this, player.blockInteractionRange(), player.entityInteractionRange(), 1F).getType() == HitResult.Type.BLOCK;
+        var spectated = SpecUtil.getCameraPlayer(Minecraft.getInstance());
+        var blockRange = spectated == null ? player.blockInteractionRange() : spectated.blockInteractionRange();
+        var entityRange = spectated == null ? player.entityInteractionRange() : spectated.entityInteractionRange();
+        return LocalPlayerAccessor.invokePick(this, blockRange, entityRange, 1F).getType() == HitResult.Type.BLOCK;
     }
 }

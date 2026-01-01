@@ -167,25 +167,4 @@ public abstract class GameRendererMixin {
         if (minecraft.getCameraEntity() == this.minecraft.player) return instance.getInterpolatedBob(partialTick);
         return Mth.lerp(partialTick, this.bobO, this.bob);
     }
-
-    @ModifyExpressionValue(method = "pick(F)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;blockInteractionRange()D"))
-    private double spectatorplus$modifyBlockInteractionRange(double original) {
-        final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
-        if (spectated != null) {
-            return spectated.blockInteractionRange();
-        }
-
-        return original;
-    }
-
-    @ModifyExpressionValue(method = "pick(F)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;entityInteractionRange()D"))
-    private double spectatorplus$modifyEntityInteractionRange(double original) {
-        final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
-        if (spectated != null) {
-            return spectated.entityInteractionRange();
-        }
-
-        return original;
-    }
-
 }
