@@ -5,7 +5,8 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +19,7 @@ public record ClientboundExperienceSyncPacket(
         int level
 ) implements ClientboundSyncPacket {
     public static final StreamCodec<FriendlyByteBuf, ClientboundExperienceSyncPacket> STREAM_CODEC = CustomPacketPayload.codec(ClientboundExperienceSyncPacket::write, ClientboundExperienceSyncPacket::new);
-    public static final CustomPacketPayload.Type<ClientboundExperienceSyncPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.parse("spectatorplus:experience_sync"));
+    public static final CustomPacketPayload.Type<ClientboundExperienceSyncPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("spectatorplus","experience_sync"));
     private static final String PERMISSION = "spectatorplus.sync.experience";
 
     public static ClientboundExperienceSyncPacket initializing(ServerPlayer target) {
