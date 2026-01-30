@@ -22,6 +22,20 @@ loom {
         }
     }
 
+    runs {
+        getByName("client") {
+            client()
+            ideConfigGenerated(true)
+            runDir("run/client")
+        }
+
+        getByName("server") {
+            server()
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+    }
+
     accessWidenerPath = file("src/main/resources/spectatorplus.accesswidener")
 }
 
