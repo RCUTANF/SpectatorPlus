@@ -6,7 +6,7 @@ import com.hpfxd.spectatorplus.fabric.sync.SyncedEffect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 
@@ -20,7 +20,7 @@ public class EffectUtil {
         Set<Holder<MobEffect>> newEffects = new HashSet<>();
 
         for (SyncedEffect syncedEffect : effects) {
-            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(syncedEffect.effectKey))
+            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.get(Identifier.parse(syncedEffect.effectKey))
                     .orElseThrow(() -> new IllegalArgumentException("Unknown effect: " + syncedEffect.effectKey));
             newEffects.add(effect);
         }
@@ -30,7 +30,7 @@ public class EffectUtil {
 
         // 添加新效果（保持现有实例的BlendState）
         for (SyncedEffect syncedEffect : effects) {
-            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(syncedEffect.effectKey))
+            Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.get(Identifier.parse(syncedEffect.effectKey))
                     .orElseThrow(() -> new IllegalArgumentException("Unknown effect: " + syncedEffect.effectKey));
 
             if (!activeEffects.containsKey(effect)) {
