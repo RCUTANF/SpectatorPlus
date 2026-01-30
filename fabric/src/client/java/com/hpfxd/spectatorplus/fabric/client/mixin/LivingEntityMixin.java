@@ -60,7 +60,7 @@ public abstract class LivingEntityMixin extends Entity {
             at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;activeEffects:Ljava/util/Map;"))
     private Map<Holder<MobEffect>, MobEffectInstance> spectatorplus$redirectActiveEffects(LivingEntity instance) {
         // 只对玩家且满足条件时才重定向
-        if (instance instanceof Player && EffectUtil.shouldUseSpectatorData()) {
+        if (instance.level().isClientSide() && instance instanceof Player && EffectUtil.shouldUseSpectatorData()) {
             return EffectUtil.getActiveEffectsMap();
         }
         return ((LivingEntityAccessor) instance).spectatorplus$getActiveEffects();
