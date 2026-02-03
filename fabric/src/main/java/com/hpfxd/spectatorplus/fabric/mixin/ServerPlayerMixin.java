@@ -79,7 +79,7 @@ public abstract class ServerPlayerMixin extends Player {
             ServerSyncController.sendPacket(spectator, ClientboundHotbarSyncPacket.initializing(target));
             ServerSyncController.sendPacket(spectator, ClientboundSelectedSlotSyncPacket.initializing(target));
             InventorySyncHandler.sendPacket(spectator, target);
-            CursorSyncHandler.sendPacket(spectator, target);
+            //CursorSyncHandler.sendPacket(spectator, target);
             EffectsSyncHandler.onStartSpectating(spectator, target);
 
             // Send initial map data patch packet if the target has a map in inventory

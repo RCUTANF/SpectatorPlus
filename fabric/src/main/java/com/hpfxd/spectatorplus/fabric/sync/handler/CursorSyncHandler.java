@@ -28,6 +28,13 @@ public class CursorSyncHandler {
      * Called when a player's cursor item changes
      */
     public static void onCursorChanged(ServerPlayer player, ItemStack newCursor) {
+        onCursorChanged(player, newCursor, -1);
+    }
+
+    /**
+     * Called when a player's cursor item changes
+     */
+    public static void onCursorChanged(ServerPlayer player, ItemStack newCursor, int originSlot) {
         try {
             ItemStack oldCursor = playerCursors.get(player.getUUID());
             if  (oldCursor == null) {
@@ -45,7 +52,7 @@ public class CursorSyncHandler {
                 ClientboundScreenCursorSyncPacket packet = new ClientboundScreenCursorSyncPacket(
                     player.getUUID(),
                     newCursor,
-                    0  //TODO: Origin slot using for recognize mouse on upon(container) or bottom(inventory)，the number means the shift slot of mouse.
+                    originSlot
                 );
 
                 ServerSyncController.broadcastPacketToSpectators(player, packet);
@@ -65,7 +72,7 @@ public class CursorSyncHandler {
             ClientboundScreenCursorSyncPacket packet = new ClientboundScreenCursorSyncPacket(
                 target.getUUID(),
                 cursor,
-                0
+                -1
             );
 
             ServerSyncController.sendPacket(spectator, packet);

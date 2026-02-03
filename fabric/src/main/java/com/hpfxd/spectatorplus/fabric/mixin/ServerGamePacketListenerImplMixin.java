@@ -26,6 +26,6 @@ public abstract class ServerGamePacketListenerImplMixin {
     @Inject(method = "handleContainerClick(Lnet/minecraft/network/protocol/game/ServerboundContainerClickPacket;)V", at = @At("TAIL"))
     private void spectatorplus$syncCursorAfterClick(ServerboundContainerClickPacket packet, CallbackInfo ci) {
         // After handling container click, check if cursor item changed
-        CursorSyncHandler.onCursorChanged(this.player, this.player.containerMenu.getCarried());
+        CursorSyncHandler.onCursorChanged(this.player, this.player.containerMenu.getCarried(), packet.slotNum());
     }
 }
