@@ -95,10 +95,10 @@ public class ScreenSyncHandler {
         // Send screen sync packet to indicate survival inventory
         int flags = 1; // Survival inventory flag
         flags |= (1 << 1); // Client requested flag
-        ServerSyncController.sendPacket(spectator, new ClientboundScreenSyncPacket(target.getUUID(), flags));
-
         // Send full inventory data
         InventorySyncHandler.sendPacket(spectator, target);
+
+        ServerSyncController.sendPacket(spectator, new ClientboundScreenSyncPacket(target.getUUID(), flags));
     }
 
     private static boolean canSyncInventory(ServerPlayer player) {
@@ -160,13 +160,9 @@ public class ScreenSyncHandler {
     private static void syncPlayerInventoryScreen(ServerPlayer spectator, ServerPlayer target) {
         // Send screen sync packet for player inventory (survival inventory)
         int flags = 1; // Survival inventory flag
-        ServerSyncController.sendPacket(spectator, new ClientboundScreenSyncPacket(target.getUUID(), flags));
-
         // Send the target's inventory data to the spectator
         InventorySyncHandler.sendPacket(spectator, target);
 
-        // Note: The client will handle opening the synced inventory screen based on the packets sent above.
-        // No need to call openMenu() here as the client-side ScreenSyncController will process the
-        // ClientboundScreenSyncPacket and open the appropriate synced screen automatically.
+        ServerSyncController.sendPacket(spectator, new ClientboundScreenSyncPacket(target.getUUID(), flags));
     }
 }
