@@ -1,6 +1,7 @@
 package com.hpfxd.spectatorplus.fabric.sync.packet;
 
 import com.hpfxd.spectatorplus.fabric.sync.ClientboundSyncPacket;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -16,6 +17,7 @@ public record ClientboundScreenSyncPacket(
 ) implements ClientboundSyncPacket {
     public static final StreamCodec<FriendlyByteBuf, ClientboundScreenSyncPacket> STREAM_CODEC = CustomPacketPayload.codec(ClientboundScreenSyncPacket::write, ClientboundScreenSyncPacket::new);
     public static final CustomPacketPayload.Type<ClientboundScreenSyncPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.parse("spectatorplus:screen_sync"));
+    private static final String PERMISSION = "spectatorplus.sync.screen";
 
     public ClientboundScreenSyncPacket(FriendlyByteBuf buf) {
         this(buf.readUUID(), buf.readByte());
@@ -45,6 +47,6 @@ public record ClientboundScreenSyncPacket(
 
     @Override
     public boolean canSend(ServerPlayer receiver) {
-        return true;
+        return Permissions.check(receiver, PERMISSION, true);
     }
 }

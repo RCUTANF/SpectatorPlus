@@ -9,11 +9,9 @@ import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundScreenSyncPacket;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.EntityEquipment;
 import net.minecraft.world.entity.player.Inventory;
@@ -50,6 +48,20 @@ public class ScreenSyncController {
         syncData.screen.isSurvivalInventory = packet.isSurvivalInventory();
         syncData.screen.isClientRequested = packet.isClientRequested();
         syncData.screen.hasDummySlots = packet.hasDummySlots();
+
+        // If this is a survival inventory screen sync, try to open it immediately
+        if (syncData.screen.isSurvivalInventory) {
+            final Minecraft mc = Minecraft.getInstance();
+            mc.execute(() -> {
+                if (isPendingOpen && syncData.screen.isSurvivalInventory) {
+                    // Create the synced inventory first, so the mixin can use it
+                    final Player player = SpecUtil.getCameraPlayer(mc);
+                    if (player != null && createInventory(player)) {
+                        openPlayerInventory(mc);
+                    }
+                }
+            });
+        }
     }
 
     private static void handle(ClientboundInventorySyncPacket packet, ClientPlayNetworking.Context context) {
@@ -79,6 +91,14 @@ public class ScreenSyncController {
                 }
             }
         }
+
+//        // For survival inventory, create the synced inventory if pending open and not yet created
+//        if (isPendingOpen && syncData.screen.isSurvivalInventory && syncedInventory == null) {
+//            final Player spectated = SpecUtil.getCameraPlayer(Minecraft.getInstance());
+//            if (spectated != null) {
+//                createInventory(spectated);
+//            }
+//        }
     }
 
     private static void handle(ClientboundScreenCursorSyncPacket packet, ClientPlayNetworking.Context context) {
@@ -98,9 +118,10 @@ public class ScreenSyncController {
 
     public static void openPlayerInventory(Minecraft mc) {
         final Player player = SpecUtil.getCameraPlayer(mc);
-        final SyncedInventoryScreen screen = new SyncedInventoryScreen(player);
-
-        handleNewSyncedScreen(mc, screen);
+        if (player != null && mc.player != null) {
+            final SyncedInventoryScreen screen = new SyncedInventoryScreen(player);
+            handleNewSyncedScreen(mc, screen);
+        }
     }
 
     public static <S extends Screen & MenuAccess<?>> void handleNewSyncedScreen(Minecraft mc, S screen) {

@@ -3,14 +3,15 @@ package com.hpfxd.spectatorplus.fabric.mixin;
 import com.google.common.collect.Lists;
 import com.hpfxd.spectatorplus.fabric.SpectatorMod;
 import com.hpfxd.spectatorplus.fabric.sync.ServerSyncController;
+import com.hpfxd.spectatorplus.fabric.sync.handler.CursorSyncHandler;
 import com.hpfxd.spectatorplus.fabric.sync.handler.EffectsSyncHandler;
+import com.hpfxd.spectatorplus.fabric.sync.handler.InventorySyncHandler;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundExperienceSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundHotbarSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundSelectedSlotSyncPacket;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
@@ -58,6 +59,16 @@ public abstract class ServerPlayerMixin extends Player {
         ServerSyncController.broadcastPacketToSpectators((ServerPlayer) (Object) this, new ClientboundExperienceSyncPacket(this.getUUID(), this.experienceProgress, this.getXpNeededForNextLevel(), this.experienceLevel));
     }
 
+    @Inject(method = "setCamera(Lnet/minecraft/world/entity/Entity;)V", at = @At("HEAD"))
+    private void spectatorplus$beforeCameraChange(Entity entityToSpectate, CallbackInfo ci) {
+        final ServerPlayer spectator = (ServerPlayer) (Object) this;
+
+        // If we're changing from spectating a player to something else, clean up
+        if (spectator.getCamera() instanceof ServerPlayer oldTarget && spectator.getCamera() != entityToSpectate) {
+            // TODO: Could add cleanup logic here if needed
+            // This runs before the camera change, so we can still access the old camera
+        }
+    }
     @Inject(method = "setCamera(Lnet/minecraft/world/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
     private void spectatorplus$syncToNewSpectator(Entity entityToSpectate, CallbackInfo ci) {
         if (entityToSpectate instanceof final ServerPlayer target) {
@@ -67,6 +78,8 @@ public abstract class ServerPlayerMixin extends Player {
             ServerSyncController.sendPacket(spectator, ClientboundFoodSyncPacket.initializing(target));
             ServerSyncController.sendPacket(spectator, ClientboundHotbarSyncPacket.initializing(target));
             ServerSyncController.sendPacket(spectator, ClientboundSelectedSlotSyncPacket.initializing(target));
+            InventorySyncHandler.sendPacket(spectator, target);
+            CursorSyncHandler.sendPacket(spectator, target);
             EffectsSyncHandler.onStartSpectating(spectator, target);
 
             // Send initial map data patch packet if the target has a map in inventory
