@@ -41,9 +41,13 @@ public class ScreenSyncHandler {
     private static void handle(ServerboundOpenedInventorySyncPacket packet, ServerPlayNetworking.Context ctx) {
         try {
             final var player = ctx.player();
-            onPlayerOpenInventory(player);
+            if (packet.isOpened()) {
+                onPlayerOpenInventory(player);
+            } else {
+                onPlayerCloseInventory(player);
+            }
         } catch (Exception e) {
-            LOGGER.error("Error handling player inventory open", e);
+            LOGGER.error("Error handling player inventory open/close", e);
         }
     }
 
@@ -88,6 +92,38 @@ public class ScreenSyncHandler {
             }
         } catch (Exception e) {
             LOGGER.error("Error syncing player inventory screen for {}", target.getGameProfile().name(), e);
+        }
+    }
+
+    /**
+     * Called when a player closes their inventory or any container screen.
+     * This method closes the synced screen for all spectators who are viewing this player.
+     *
+     * @param target The player who closed their inventory/container
+     */
+    private static void onPlayerCloseInventory(ServerPlayer target) {
+        try {
+            // Get all spectators who are currently viewing this player
+            var spectators = ServerSyncController.getSpectators(target);
+            if (spectators.isEmpty()) {
+                return; // No spectators, no need to sync
+            }
+
+            for (ServerPlayer spectator : spectators) {
+                if (!canSyncInventory(spectator)) {
+                    continue;
+                }
+
+                LOGGER.debug("Syncing inventory close for spectator {} viewing {}",
+                    spectator.getGameProfile().name(), target.getGameProfile().name());
+
+                // Send screen sync packet to indicate inventory/container was closed
+                int flags = 0; // No flags means close screen
+                flags |= (1 << 3); // Screen closed flag
+                ServerSyncController.sendPacket(spectator, new ClientboundScreenSyncPacket(target.getUUID(), flags));
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error syncing player inventory close for {}", target.getGameProfile().name(), e);
         }
     }
 

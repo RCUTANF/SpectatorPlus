@@ -40,6 +40,10 @@ public record ClientboundScreenSyncPacket(
         return (this.flags >> 2 & 1) == 1;
     }
 
+    public boolean isScreenClosed() {
+        return (this.flags >> 3 & 1) == 1;
+    }
+
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
         return TYPE;

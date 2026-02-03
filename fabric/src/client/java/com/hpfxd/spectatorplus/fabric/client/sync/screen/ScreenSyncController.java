@@ -44,6 +44,16 @@ public class ScreenSyncController {
         setSyncData(packet.playerId());
         syncData.setScreen();
 
+        // Check if this is a screen close event
+        if (packet.isScreenClosed()) {
+            // Close the synced inventory screen
+            final Minecraft mc = Minecraft.getInstance();
+            mc.execute(() -> {
+                closeSyncedInventory();
+            });
+            return;
+        }
+
         isPendingOpen = true;
         syncData.screen.isSurvivalInventory = packet.isSurvivalInventory();
         syncData.screen.isClientRequested = packet.isClientRequested();
@@ -91,14 +101,6 @@ public class ScreenSyncController {
                 }
             }
         }
-
-//        // For survival inventory, create the synced inventory if pending open and not yet created
-//        if (isPendingOpen && syncData.screen.isSurvivalInventory && syncedInventory == null) {
-//            final Player spectated = SpecUtil.getCameraPlayer(Minecraft.getInstance());
-//            if (spectated != null) {
-//                createInventory(spectated);
-//            }
-//        }
     }
 
     private static void handle(ClientboundScreenCursorSyncPacket packet, ClientPlayNetworking.Context context) {
@@ -110,9 +112,20 @@ public class ScreenSyncController {
     }
 
     public static void closeSyncedInventory() {
+        final Minecraft mc = Minecraft.getInstance();
         if (syncedScreen != null) {
-            syncedScreen.onClose();
-            syncedInventory = null;
+            // Close the current synced screen
+            mc.setScreen(null);
+            syncedScreen = null;
+        }
+        // Clean up synced inventory and related state
+        syncedInventory = null;
+        syncedWindowId = Integer.MIN_VALUE;
+        isPendingOpen = false;
+
+        // Clear screen sync data
+        if (syncData != null) {
+            syncData.screen = null;
         }
     }
 
