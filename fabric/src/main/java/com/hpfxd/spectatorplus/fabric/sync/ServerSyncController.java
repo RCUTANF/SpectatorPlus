@@ -1,5 +1,6 @@
 package com.hpfxd.spectatorplus.fabric.sync;
 
+import com.hpfxd.spectatorplus.fabric.sync.handler.ContainerSyncHandler;
 import com.hpfxd.spectatorplus.fabric.sync.handler.CursorSyncHandler;
 import com.hpfxd.spectatorplus.fabric.sync.handler.EffectsSyncHandler;
 import com.hpfxd.spectatorplus.fabric.sync.handler.HotbarSyncHandler;
@@ -19,6 +20,7 @@ public class ServerSyncController {
 
         HotbarSyncHandler.init();
         ScreenSyncHandler.init();
+        ContainerSyncHandler.init();
         EffectsSyncHandler.init();
         InventorySyncHandler.init();
         CursorSyncHandler.init();

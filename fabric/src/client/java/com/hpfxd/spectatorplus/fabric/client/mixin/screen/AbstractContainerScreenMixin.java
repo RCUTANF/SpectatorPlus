@@ -5,6 +5,7 @@ import com.hpfxd.spectatorplus.fabric.client.gui.screens.ItemMoveAnimation;
 import com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController;
 import com.hpfxd.spectatorplus.fabric.client.sync.screen.ScreenSyncController;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -141,6 +142,47 @@ public abstract class AbstractContainerScreenMixin {
         }
 
         this.animations.removeIf(animation -> ++animation.tick >= MOVE_ANIMATION_TICKS);
+    }
+
+    @Inject(method = "containerTick", at = @At("TAIL"))
+    private void spectatorplus$syncContainerItems(CallbackInfo ci) {
+        if (!this.spectatorplus$isSyncedScreen()) {
+            return;
+        }
+
+        this.spectatorplus$syncContainerItems();
+    }
+
+
+    @Unique
+    private void spectatorplus$syncContainerItems() {
+        AbstractContainerScreen<?> self = (AbstractContainerScreen<?>) (Object) this;
+        var minecraft = Minecraft.getInstance();
+
+        if (minecraft == null || minecraft.player == null) {
+            return;
+        }
+
+        var syncData = ClientSyncController.syncData;
+        var containerItems = syncData.screen.containerItems;
+
+        // Find container slots and sync items
+        int containerItemIndex = 0;
+        for (int slotIndex = 0; slotIndex < self.getMenu().slots.size() && containerItemIndex < containerItems.size(); slotIndex++) {
+            Slot slot = self.getMenu().slots.get(slotIndex);
+
+            // Only sync container slots, not player inventory
+            if (slot.container != minecraft.player.getInventory()) {
+                ItemStack syncedItem = containerItems.get(containerItemIndex);
+                slot.set(syncedItem);
+                containerItemIndex++;
+            }
+        }
+
+        // Sync cursor item
+        if (syncData.screen.cursorItem != null) {
+            minecraft.player.containerMenu.setCarried(syncData.screen.cursorItem);
+        }
     }
 
     @ModifyExpressionValue(

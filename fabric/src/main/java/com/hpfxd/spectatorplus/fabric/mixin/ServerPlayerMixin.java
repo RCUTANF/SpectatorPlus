@@ -6,6 +6,7 @@ import com.hpfxd.spectatorplus.fabric.sync.ServerSyncController;
 import com.hpfxd.spectatorplus.fabric.sync.handler.CursorSyncHandler;
 import com.hpfxd.spectatorplus.fabric.sync.handler.EffectsSyncHandler;
 import com.hpfxd.spectatorplus.fabric.sync.handler.InventorySyncHandler;
+import com.hpfxd.spectatorplus.fabric.sync.handler.ScreenSyncHandler;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundExperienceSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundHotbarSyncPacket;
@@ -36,7 +37,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.OptionalInt;
 import java.util.Set;
 
 @Mixin(ServerPlayer.class)
@@ -65,8 +68,8 @@ public abstract class ServerPlayerMixin extends Player {
 
         // If we're changing from spectating a player to something else, clean up
         if (spectator.getCamera() instanceof ServerPlayer oldTarget && spectator.getCamera() != entityToSpectate) {
-            // TODO: Could add cleanup logic here if needed
-            // This runs before the camera change, so we can still access the old camera
+            // Clean up any container listeners when stopping spectating a player
+            ScreenSyncHandler.cleanupSpectatorListeners(spectator, oldTarget);
         }
     }
     @Inject(method = "setCamera(Lnet/minecraft/world/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
@@ -79,7 +82,6 @@ public abstract class ServerPlayerMixin extends Player {
             ServerSyncController.sendPacket(spectator, ClientboundHotbarSyncPacket.initializing(target));
             ServerSyncController.sendPacket(spectator, ClientboundSelectedSlotSyncPacket.initializing(target));
             InventorySyncHandler.sendPacket(spectator, target);
-            //CursorSyncHandler.sendPacket(spectator, target);
             EffectsSyncHandler.onStartSpectating(spectator, target);
 
             // Send initial map data patch packet if the target has a map in inventory
@@ -141,6 +143,25 @@ public abstract class ServerPlayerMixin extends Player {
             }
 
             this.setCamera(entity);
+        }
+    }
+
+    @Inject(method = "openMenu(Lnet/minecraft/world/MenuProvider;)Ljava/util/OptionalInt;", at = @At("RETURN"))
+    private void spectatorplus$onOpenMenu(CallbackInfoReturnable<OptionalInt> cir) {
+
+        final ServerPlayer player = (ServerPlayer) (Object) this;
+
+        if (cir.getReturnValue().isPresent() && player.containerMenu != player.inventoryMenu) {
+            ScreenSyncHandler.syncScreenOpened(player);
+        }
+    }
+
+    @Inject(method = "doCloseContainer()V", at = @At("HEAD"))
+    private void spectatorplus$onCloseContainer(CallbackInfo ci) {
+        final ServerPlayer player = (ServerPlayer) (Object) this;
+
+        if (player.containerMenu != player.inventoryMenu) {
+            ScreenSyncHandler.syncScreenClosed(player);
         }
     }
 }

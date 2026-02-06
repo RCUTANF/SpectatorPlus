@@ -7,7 +7,6 @@ import com.hpfxd.spectatorplus.fabric.sync.packet.ServerboundOpenedInventorySync
 import com.hpfxd.spectatorplus.fabric.sync.packet.ServerboundRequestInventoryOpenPacket;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
@@ -42,9 +41,9 @@ public class ScreenSyncHandler {
         try {
             final var player = ctx.player();
             if (packet.isOpened()) {
-                onPlayerOpenInventory(player);
+                syncScreenOpened(player);
             } else {
-                onPlayerCloseInventory(player);
+                syncScreenClosed(player);
             }
         } catch (Exception e) {
             LOGGER.error("Error handling player inventory open/close", e);
@@ -64,7 +63,7 @@ public class ScreenSyncHandler {
      *
      * @param target The player who opened their inventory/container
      */
-    private static void onPlayerOpenInventory(ServerPlayer target) {
+    public static void syncScreenOpened(ServerPlayer target) {
         try {
             // Get all spectators who are currently viewing this player
             var spectators = ServerSyncController.getSpectators(target);
@@ -80,9 +79,9 @@ public class ScreenSyncHandler {
                 // Determine what type of screen the target player has open
                 if (target.containerMenu != target.inventoryMenu) {
                     // Player has a container open (chest, crafting table, furnace, etc.)
-                    LOGGER.debug("Syncing container screen for spectator {} viewing {}",
+                    LOGGER.debug("Subscribing spectator {} to container of {}",
                         spectator.getGameProfile().name(), target.getGameProfile().name());
-                    syncContainerScreen(spectator, target);
+                    ContainerSyncHandler.subscribeToContainer(spectator, target);
                 } else {
                     // Player has their regular inventory open (survival/creative inventory)
                     LOGGER.debug("Syncing player inventory screen for spectator {} viewing {}",
@@ -101,7 +100,7 @@ public class ScreenSyncHandler {
      *
      * @param target The player who closed their inventory/container
      */
-    private static void onPlayerCloseInventory(ServerPlayer target) {
+    public static void syncScreenClosed(ServerPlayer target) {
         try {
             // Get all spectators who are currently viewing this player
             var spectators = ServerSyncController.getSpectators(target);
@@ -116,6 +115,9 @@ public class ScreenSyncHandler {
 
                 LOGGER.debug("Syncing inventory close for spectator {} viewing {}",
                     spectator.getGameProfile().name(), target.getGameProfile().name());
+
+                // Remove any container listeners for this spectator
+                ContainerSyncHandler.unsubscribeFromContainer(spectator, target);
 
                 // Send screen sync packet to indicate inventory/container was closed
                 int flags = 0; // No flags means close screen
@@ -156,34 +158,11 @@ public class ScreenSyncHandler {
     }
 
     /**
-     * Syncs a container screen (chest, crafting table, furnace, etc.) to a spectator.
-     * This is used when the target player has opened a container that isn't their inventory.
-     *
-     * @param spectator The spectator to sync the screen to
-     * @param target The player whose container screen should be synced
+     * Clean up all listeners for a spectator when they stop spectating a target.
+     * Called from ServerPlayerMixin when camera changes.
      */
-    private static void syncContainerScreen(ServerPlayer spectator, ServerPlayer target) {
-        // Send screen sync packet for container screen
-        int flags = 0; // Container screen (not survival inventory)
-        flags |= (1 << 2); // Has dummy slots flag for container screens
-        ServerSyncController.sendPacket(spectator, new ClientboundScreenSyncPacket(target.getUUID(), flags));
-
-        // Send the target's inventory data to the spectator
-        InventorySyncHandler.sendPacket(spectator, target);
-
-        // For container screens (chests, crafting tables, etc.), we can send ClientboundOpenScreenPacket
-        // because container menus have proper MenuType implementations
-        try {
-            spectator.connection.send(new ClientboundOpenScreenPacket(
-                    target.containerMenu.containerId,
-                    target.containerMenu.getType(),
-                    target.getDisplayName()
-            ));
-        } catch (Exception e) {
-            LOGGER.warn("Could not sync container screen type for {} to spectator {}: {}",
-                target.getGameProfile().name(), spectator.getGameProfile().name(), e.getMessage());
-            // Continue without the screen packet - the client will handle it through sync packets
-        }
+    public static void cleanupSpectatorListeners(ServerPlayer spectator, ServerPlayer target) {
+        ContainerSyncHandler.cleanupSpectatorListeners(spectator, target);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.hpfxd.spectatorplus.fabric.client.sync;
 
 import com.hpfxd.spectatorplus.fabric.client.sync.screen.ScreenSyncController;
 import com.hpfxd.spectatorplus.fabric.client.util.EffectUtil;
+import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundContainerSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundExperienceSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundHotbarSyncPacket;
@@ -10,6 +11,7 @@ import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundSelectedSlotSyncPac
 import java.util.List;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundEffectsSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.SyncedEffect;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
@@ -30,6 +32,7 @@ public class ClientSyncController {
     private static Minecraft minecraft = Minecraft.getInstance();
 
     public static void init() {
+        ClientPlayNetworking.registerGlobalReceiver(ClientboundContainerSyncPacket.TYPE, ClientSyncController::handle);
         ClientPlayNetworking.registerGlobalReceiver(ClientboundExperienceSyncPacket.TYPE, ClientSyncController::handle);
         ClientPlayNetworking.registerGlobalReceiver(ClientboundFoodSyncPacket.TYPE, ClientSyncController::handle);
         ClientPlayNetworking.registerGlobalReceiver(ClientboundHotbarSyncPacket.TYPE, ClientSyncController::handle);
@@ -39,6 +42,22 @@ public class ClientSyncController {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> setSyncData(null));
 
         ScreenSyncController.init();
+    }
+
+    private static void handle(ClientboundContainerSyncPacket packet, ClientPlayNetworking.Context context) {
+        setSyncData(packet.playerId());
+        syncData.setScreen();
+
+        // Set container data
+        syncData.screen.containerType = packet.containerType();
+        syncData.screen.containerSize = packet.containerSize();
+
+        // Initialize container items if not already done
+        syncData.screen.initializeContainerItems(packet.containerSize());
+
+        // Update container items
+        // Support incremental updates: null items in the array mean "don't update this slot"
+        syncData.screen.updateContainerItems(packet.items());
     }
 
     private static void handle(ClientboundEffectsSyncPacket packet, ClientPlayNetworking.Context context) {
