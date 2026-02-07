@@ -45,10 +45,10 @@ jobs:
       - name: List build artifacts
         run: |
           echo "=== Fabric artifacts ==="
-          ls -lh fabric/build/libs/ 2>/dev/null || echo "No Fabric artifacts found"
+          find fabric/fabric-*/build/libs -name "*.jar" 2>/dev/null || echo "No Fabric artifacts found"
           echo ""
           echo "=== Paper artifacts ==="
-          ls -lh paper/build/libs/ 2>/dev/null || echo "No Paper artifacts found"
+          find paper/paper-*/build/libs -name "*.jar" 2>/dev/null || echo "No Paper artifacts found"
 
       - name: Upload Fabric artifacts
         uses: actions/upload-artifact@v4
@@ -56,9 +56,9 @@ jobs:
         with:
           name: fabric-builds
           path: |
-            fabric/build/libs/*.jar
-            !fabric/build/libs/*-dev.jar
-            !fabric/build/libs/*-sources.jar
+            fabric/fabric-*/build/libs/*.jar
+            !fabric/fabric-*/build/libs/*-dev.jar
+            !fabric/fabric-*/build/libs/*-sources.jar
           retention-days: 7
 
       - name: Upload Paper artifacts
@@ -67,9 +67,9 @@ jobs:
         with:
           name: paper-builds
           path: |
-            paper/build/libs/*.jar
-            !paper/build/libs/*-dev.jar
-            !paper/build/libs/*-sources.jar
+            paper/paper-*/build/libs/*.jar
+            !paper/paper-*/build/libs/*-dev.jar
+            !paper/paper-*/build/libs/*-sources.jar
           retention-days: 7
 
       - name: Check build reports

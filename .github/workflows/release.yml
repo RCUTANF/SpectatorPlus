@@ -51,31 +51,35 @@ jobs:
       - name: List build artifacts
         run: |
           echo "=== Fabric artifacts ==="
-          ls -lh fabric/build/libs/ || true
+          find fabric/fabric-*/build/libs -name "*.jar" 2>/dev/null || echo "No Fabric artifacts found"
+          echo ""
           echo "=== Paper artifacts ==="
-          ls -lh paper/build/libs/ || true
+          find paper/paper-*/build/libs -name "*.jar" 2>/dev/null || echo "No Paper artifacts found"
 
       - name: Prepare release artifacts
         id: artifacts
         run: |
           mkdir -p release-artifacts
           
-          # Copy Fabric builds
-          if [ -d "fabric/build/libs" ]; then
-            find fabric/build/libs -name "*.jar" -not -name "*-dev.jar" -not -name "*-sources.jar" -exec cp {} release-artifacts/ \;
-          fi
+          # Copy Fabric builds from subprojects
+          find fabric/fabric-*/build/libs -type f -name "*.jar" -not -name "*-dev.jar" -not -name "*-sources.jar" 2>/dev/null | while read jar; do
+            cp "$jar" release-artifacts/
+            echo "Copied: $(basename $jar)"
+          done
           
-          # Copy Paper builds
-          if [ -d "paper/build/libs" ]; then
-            find paper/build/libs -name "*.jar" -not -name "*-dev.jar" -not -name "*-sources.jar" -exec cp {} release-artifacts/ \;
-          fi
+          # Copy Paper builds from subprojects
+          find paper/paper-*/build/libs -type f -name "*.jar" -not -name "*-dev.jar" -not -name "*-sources.jar" 2>/dev/null | while read jar; do
+            cp "$jar" release-artifacts/
+            echo "Copied: $(basename $jar)"
+          done
           
+          echo ""
           echo "=== Release artifacts ==="
-          ls -lh release-artifacts/
+          ls -lh release-artifacts/ || echo "No artifacts prepared!"
           
           # Generate artifact list for release notes
           echo "ARTIFACTS<<EOF" >> $GITHUB_OUTPUT
-          ls -1 release-artifacts/ >> $GITHUB_OUTPUT
+          ls -1 release-artifacts/ 2>/dev/null >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Generate changelog
@@ -114,7 +118,7 @@ jobs:
             
             ### Paper
             - For Paper servers: `spectatorplus-paper-${{ steps.version.outputs.VERSION }}.jar`
-                     
+
             ---
             
             **Full Changelog**: https://github.com/${{ github.repository }}/commits/v${{ steps.version.outputs.VERSION }}
