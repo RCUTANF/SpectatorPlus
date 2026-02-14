@@ -7,11 +7,21 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public final class CustomPacketCodecs {
+    /**
+     * Maximum number of items allowed in a single items sync packet.
+     * Vanilla player inventory has 41 slots; 128 provides generous headroom
+     * while preventing malicious packets from causing OutOfMemoryError.
+     */
+    private static final int MAX_ITEMS = 128;
+
     private CustomPacketCodecs() {
     }
 
     public static ItemStack[] readItems(RegistryFriendlyByteBuf buf) {
         final int len = buf.readInt();
+        if (len < 0 || len > MAX_ITEMS) {
+            throw new DecoderException("Item array length " + len + " is outside allowed range [0, " + MAX_ITEMS + "]");
+        }
         final ItemStack[] items = new ItemStack[len];
 
         for (int slot = 0; slot < len; slot++) {
@@ -39,7 +49,6 @@ public final class CustomPacketCodecs {
             throw new DecoderException("Failed to read ItemStack", e);
         }
     }
-
 
     public static void writeItem(RegistryFriendlyByteBuf buf, @NotNull ItemStack item) {
         try {
