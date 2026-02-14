@@ -208,7 +208,7 @@ public abstract class GuiMixin {
                             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, EFFECT_BACKGROUND_SPRITE, baseX, y,
                                     itemWidth, itemHeight);
 
-                            Identifier effectIcon = Gui.getMobEffectSprite(effectInstance.getEffect());
+                            Identifier effectIcon = getEffectIcon(effectInstance.effectKey);
                             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, effectIcon, baseX + 2, y + 2,
                                     itemWidth - 4, itemHeight - 4);
 
