@@ -12,6 +12,8 @@ plugins {
 
 rootProject.name = "spectatorplus"
 
+
+
 fun setupSubproject(moduleName: String) {
     val name = "spectatorplus-$moduleName"
     include(name)

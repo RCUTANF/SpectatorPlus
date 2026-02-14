@@ -46,32 +46,41 @@ import net.minecraft.core.Holder;
 @Mixin(Gui.class)
 public abstract class GuiMixin {
     // Local copy of vanilla overlay resource location
-    @Shadow @Final private Minecraft minecraft;
-    @Shadow public abstract SpectatorGui getSpectatorGui();
-    @Shadow protected abstract void renderItemHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker);
-    @Shadow protected abstract void renderPortalOverlay(GuiGraphics guiGraphics, float intensity);
+    @Shadow
+    @Final
+    private Minecraft minecraft;
 
-    @Shadow @Final private SpectatorGui spectatorGui;
+    @Shadow
+    public abstract SpectatorGui getSpectatorGui();
 
+    @Shadow
+    protected abstract void renderItemHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker);
+
+    @Shadow
+    protected abstract void renderPortalOverlay(GuiGraphics guiGraphics, float intensity);
+
+    @Shadow
+    @Final
+    private SpectatorGui spectatorGui;
 
     // Use correct Identifiers for vanilla empty armor slot icons from the GUI atlas
     private static final Identifier EMPTY_ARMOR_SLOT_HELMET = Identifier.withDefaultNamespace("container/slot/helmet");
-    private static final Identifier EMPTY_ARMOR_SLOT_CHESTPLATE = Identifier.withDefaultNamespace("container/slot/chestplate");
-    private static final Identifier EMPTY_ARMOR_SLOT_LEGGINGS = Identifier.withDefaultNamespace("container/slot/leggings");
+    private static final Identifier EMPTY_ARMOR_SLOT_CHESTPLATE = Identifier
+            .withDefaultNamespace("container/slot/chestplate");
+    private static final Identifier EMPTY_ARMOR_SLOT_LEGGINGS = Identifier
+            .withDefaultNamespace("container/slot/leggings");
     private static final Identifier EMPTY_ARMOR_SLOT_BOOTS = Identifier.withDefaultNamespace("container/slot/boots");
-    private static final Identifier EFFECT_BACKGROUND_AMBIENT_SPRITE = Identifier.withDefaultNamespace("hud/effect_background_ambient");
+    private static final Identifier EFFECT_BACKGROUND_AMBIENT_SPRITE = Identifier
+            .withDefaultNamespace("hud/effect_background_ambient");
     private static final Identifier EFFECT_BACKGROUND_SPRITE = Identifier.withDefaultNamespace("hud/effect_background");
 
-    private static final Identifier[] TEXTURE_EMPTY_SLOTS = new Identifier[]{
-        EMPTY_ARMOR_SLOT_BOOTS, EMPTY_ARMOR_SLOT_LEGGINGS, EMPTY_ARMOR_SLOT_CHESTPLATE, EMPTY_ARMOR_SLOT_HELMET
+    private static final Identifier[] TEXTURE_EMPTY_SLOTS = new Identifier[] {
+            EMPTY_ARMOR_SLOT_BOOTS, EMPTY_ARMOR_SLOT_LEGGINGS, EMPTY_ARMOR_SLOT_CHESTPLATE, EMPTY_ARMOR_SLOT_HELMET
     };
 
-    @Inject(
-        method = "renderEffects(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V",
-        at = @At("HEAD"),
-        cancellable = true
-    )
-    private void spectatorplus$cancelRenderEffects(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+    @Inject(method = "renderEffects(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V", at = @At("HEAD"), cancellable = true)
+    private void spectatorplus$cancelRenderEffects(GuiGraphics guiGraphics, DeltaTracker deltaTracker,
+            CallbackInfo ci) {
         final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
         if (spectated != null) {
             ci.cancel();
@@ -115,33 +124,42 @@ public abstract class GuiMixin {
     }
 
     @Inject(method = "renderHotbarAndDecorations(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/spectator/SpectatorGui;renderHotbar(Lnet/minecraft/client/gui/GuiGraphics;)V"))
-    private void spectatorplus$renderHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci, @Share("spectated") LocalRef<AbstractClientPlayer> spectatedRef) {
+    private void spectatorplus$renderHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci,
+            @Share("spectated") LocalRef<AbstractClientPlayer> spectatedRef) {
         if (!this.getSpectatorGui().isMenuActive() && !this.minecraft.options.hideGui) {
             final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
             spectatedRef.set(spectated);
 
             if (spectated != null) {
-                if (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1 && !spectated.isSpectator() && SpectatorClientMod.config.renderHotbar) {
+                if (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1
+                        && !spectated.isSpectator() && SpectatorClientMod.config.renderHotbar) {
                     this.renderItemHotbar(guiGraphics, deltaTracker);
                 }
 
-                // Render all spectatee's armor in the top right: helmet, chestplate, leggings, boots
+                // Render all spectatee's armor in the top right: helmet, chestplate, leggings,
+                // boots
                 if (ClientSyncController.syncData != null && ClientSyncController.syncData.armorItems != null) {
                     int spacing = 1; // vertical spacing between items
                     int itemWidth = 16; // standard item icon width
                     int itemHeight = 16; // standard item icon height
                     int baseY = 2;
                     int baseX = this.minecraft.getWindow().getGuiScaledWidth() - itemWidth - 4;
-                    // Armor order: helmet, chestplate, leggings, boots (reverse to boots, leggings, chestplate, helmet)
-                    EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+                    // Armor order: helmet, chestplate, leggings, boots (reverse to boots, leggings,
+                    // chestplate, helmet)
+                    EquipmentSlot[] slots = { EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS,
+                            EquipmentSlot.FEET };
                     for (int i = 0; i < slots.length; i++) {
                         int idx = ClientSyncController.syncData.armorItems.size() - 1 - i;
-                        ItemStack armorStack = idx >= 0 && idx < ClientSyncController.syncData.armorItems.size() ? ClientSyncController.syncData.armorItems.get(idx) : ItemStack.EMPTY;
+                        ItemStack armorStack = idx >= 0 && idx < ClientSyncController.syncData.armorItems.size()
+                                ? ClientSyncController.syncData.armorItems.get(idx)
+                                : ItemStack.EMPTY;
                         int y = baseY + i * (itemHeight + spacing);
-                        boolean isAir = armorStack == null || armorStack.isEmpty() || armorStack.getItem() == net.minecraft.world.item.Items.AIR;
+                        boolean isAir = armorStack == null || armorStack.isEmpty()
+                                || armorStack.getItem() == net.minecraft.world.item.Items.AIR;
                         if (isAir) {
                             // Show empty slot icon if no item
-                            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE_EMPTY_SLOTS[idx], baseX, y, itemWidth, itemHeight);
+                            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURE_EMPTY_SLOTS[idx], baseX, y,
+                                    itemWidth, itemHeight);
                         } else {
                             // Show item icon if present
                             guiGraphics.renderItem(armorStack, baseX, y);
@@ -170,7 +188,8 @@ public abstract class GuiMixin {
                                 // Draw numeric part
                                 guiGraphics.drawString(this.minecraft.font, numText, textX, textY, numColor, true);
                                 // Draw '%' in white
-                                guiGraphics.drawString(this.minecraft.font, percentChar, textX + numTextWidth, textY, 0xFFFFFFFF, true);
+                                guiGraphics.drawString(this.minecraft.font, percentChar, textX + numTextWidth, textY,
+                                        0xFFFFFFFF, true);
                             }
                         }
                     }
@@ -178,35 +197,41 @@ public abstract class GuiMixin {
                     int effectBaseY = baseY + slots.length * (itemHeight + spacing) + spacing; // start below armor
 
                     // Render all active effect icons down the right side below armor
-                    LocalPlayer player = this.minecraft.player;
-                    if (player != null && player.getActiveEffects() != null && !player.getActiveEffects().isEmpty()) {
+                    if (ClientSyncController.syncData.effects != null
+                            && !ClientSyncController.syncData.effects.isEmpty()) {
                         int effectIndex = 0;
-                        for (var effectInstance : player.getActiveEffects()) {
+                        for (var effectInstance : ClientSyncController.syncData.effects) {
                             int y = effectBaseY + effectIndex * (itemWidth + spacing);
 
                             // Draw vanilla effect background
-                            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, EFFECT_BACKGROUND_SPRITE, baseX, y, itemWidth, itemHeight);
+                            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, EFFECT_BACKGROUND_SPRITE, baseX, y,
+                                    itemWidth, itemHeight);
 
                             Identifier effectIcon = Gui.getMobEffectSprite(effectInstance.getEffect());
-                            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, effectIcon, baseX + 2, y + 2, itemWidth - 4, itemHeight - 4);
+                            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, effectIcon, baseX + 2, y + 2,
+                                    itemWidth - 4, itemHeight - 4);
 
                             // Draw effect level as a small white number on the top right of the icon
-                            int level = effectInstance.getAmplifier() + 1;
+                            int level = effectInstance.amplifier + 1;
                             String levelText = String.valueOf(level);
                             int levelTextWidth = this.minecraft.font.width(levelText);
-                            int levelTextX = baseX + itemWidth - (int)(levelTextWidth * 0.4F) - 3; // right-align inside top-right corner
+                            int levelTextX = baseX + itemWidth - (int) (levelTextWidth * 0.4F) - 3; // right-align
+                                                                                                    // inside top-right
+                                                                                                    // corner
                             int levelTextY = y + 2;
                             guiGraphics.pose().pushMatrix();
                             guiGraphics.pose().scale(0.5F, 0.5F);
-                            guiGraphics.drawString(this.minecraft.font, levelText, (int)(levelTextX / 0.5F), (int)(levelTextY / 0.5F), 0xFFFFFFFF, true);
+                            guiGraphics.drawString(this.minecraft.font, levelText, (int) (levelTextX / 0.5F),
+                                    (int) (levelTextY / 0.5F), 0xFFFFFFFF, true);
                             guiGraphics.pose().popMatrix();
 
-                            // Draw duration bar (1px wide) to the left of the effect icon, color changes with percent
-                            int duration = effectInstance.getDuration();
+                            // Draw duration bar (1px wide) to the left of the effect icon, color changes
+                            // with percent
+                            int duration = effectInstance.duration;
                             int maxDuration = 3600; // 3 minutes, adjust as needed
-                            float percent = maxDuration > 0 ? (duration / (float)maxDuration) : 1.0F;
+                            float percent = maxDuration > 0 ? (duration / (float) maxDuration) : 1.0F;
                             int maxBarHeight = itemHeight - 2;
-                            int barHeight = Math.min(maxBarHeight, (int)(maxBarHeight * percent));
+                            int barHeight = Math.min(maxBarHeight, (int) (maxBarHeight * percent));
                             int barX = baseX + 1; // 1px left of icon
                             int barY = y + itemHeight - 1 - barHeight; // 1px up from bottom
                             int barColor;
@@ -230,20 +255,23 @@ public abstract class GuiMixin {
     }
 
     @ModifyExpressionValue(method = "renderHotbarAndDecorations(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;canHurtPlayer()Z"))
-    private boolean spectatorplus$renderHealth(boolean original, @Share("spectated") LocalRef<AbstractClientPlayer> spectatedRef) {
+    private boolean spectatorplus$renderHealth(boolean original,
+            @Share("spectated") LocalRef<AbstractClientPlayer> spectatedRef) {
         if (original) {
             return true;
         }
 
         final AbstractClientPlayer spectated = spectatedRef.get();
-        return spectated != null && !spectated.isCreative() && !spectated.isSpectator() && this.spectatorplus$isStatusEnabled();
+        return spectated != null && !spectated.isCreative() && !spectated.isSpectator()
+                && this.spectatorplus$isStatusEnabled();
     }
 
     @Redirect(method = "renderHotbarAndDecorations", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;hasExperience()Z"))
     private boolean spectatorplus$renderExperience(MultiPlayerGameMode instance) {
         final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
         if (spectated != null) {
-            return !spectated.isCreative() && !spectated.isSpectator() && ClientSyncController.syncData != null && ClientSyncController.syncData.experienceLevel != -1 && this.spectatorplus$isStatusEnabled();
+            return !spectated.isCreative() && !spectated.isSpectator() && ClientSyncController.syncData != null
+                    && ClientSyncController.syncData.experienceLevel != -1 && this.spectatorplus$isStatusEnabled();
         }
 
         return instance.hasExperience();
@@ -253,7 +281,8 @@ public abstract class GuiMixin {
     private boolean spectatorplus$hasExperience(MultiPlayerGameMode instance) {
         final AbstractClientPlayer spectated = SpecUtil.getCameraPlayer(this.minecraft);
         if (spectated != null) {
-            return !spectated.isCreative() && !spectated.isSpectator() && ClientSyncController.syncData != null && ClientSyncController.syncData.experienceLevel != -1 && this.spectatorplus$isStatusEnabled();
+            return !spectated.isCreative() && !spectated.isSpectator() && ClientSyncController.syncData != null
+                    && ClientSyncController.syncData.experienceLevel != -1 && this.spectatorplus$isStatusEnabled();
         }
 
         return instance.hasExperience();
@@ -265,7 +294,8 @@ public abstract class GuiMixin {
             return false;
         }
 
-        return SpectatorClientMod.config.renderStatusIfNoHotbar || (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1);
+        return SpectatorClientMod.config.renderStatusIfNoHotbar
+                || (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1);
     }
 
     @Inject(method = "canRenderCrosshairForSpectator(Lnet/minecraft/world/phys/HitResult;)Z", at = @At(value = "HEAD"), cancellable = true)
@@ -303,7 +333,8 @@ public abstract class GuiMixin {
 
     @ModifyConstant(method = "renderPlayerHealth(Lnet/minecraft/client/gui/GuiGraphics;)V", constant = @Constant(intValue = 39))
     private int spectatorplus$moveHealthDown(int constant) {
-        if ((ClientSyncController.syncData == null || ClientSyncController.syncData.selectedHotbarSlot == -1) && SpecUtil.getCameraPlayer(this.minecraft) != null) {
+        if ((ClientSyncController.syncData == null || ClientSyncController.syncData.selectedHotbarSlot == -1)
+                && SpecUtil.getCameraPlayer(this.minecraft) != null) {
             // hotbar sync data not present, shift health down
             return constant - 27;
         }
@@ -311,13 +342,16 @@ public abstract class GuiMixin {
     }
 
     @WrapWithCondition(method = "renderPlayerHealth(Lnet/minecraft/client/gui/GuiGraphics;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;renderFood(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/entity/player/Player;II)V"))
-    private boolean spectatorplus$hideNonSyncedFood(Gui instance, GuiGraphics guiGraphics, Player player, int y, int x) {
-        return (ClientSyncController.syncData != null && ClientSyncController.syncData.foodData != null) || SpecUtil.getCameraPlayer(this.minecraft) == null;
+    private boolean spectatorplus$hideNonSyncedFood(Gui instance, GuiGraphics guiGraphics, Player player, int y,
+            int x) {
+        return (ClientSyncController.syncData != null && ClientSyncController.syncData.foodData != null)
+                || SpecUtil.getCameraPlayer(this.minecraft) == null;
     }
 
     @Redirect(method = "renderItemHotbar(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;getSelectedSlot()I", opcode = Opcodes.GETFIELD))
     private int spectatorplus$showSyncedSelectedSlot(Inventory inventory) {
-        if (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1 && SpecUtil.getCameraPlayer(this.minecraft) != null) {
+        if (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1
+                && SpecUtil.getCameraPlayer(this.minecraft) != null) {
             return ClientSyncController.syncData.selectedHotbarSlot;
         }
         return inventory.getSelectedSlot();
@@ -325,16 +359,16 @@ public abstract class GuiMixin {
 
     @Redirect(method = "renderFood(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/entity/player/Player;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getFoodData()Lnet/minecraft/world/food/FoodData;"))
     private FoodData spectatorplus$showSyncedFood(Player instance) {
-        if (ClientSyncController.syncData != null && ClientSyncController.syncData.foodData != null && SpecUtil.getCameraPlayer(this.minecraft) != null) {
+        if (ClientSyncController.syncData != null && ClientSyncController.syncData.foodData != null
+                && SpecUtil.getCameraPlayer(this.minecraft) != null) {
             return ClientSyncController.syncData.foodData;
         }
         return instance.getFoodData();
     }
 
-    @Redirect(
-        method = "renderFood(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/entity/player/Player;II)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;hasEffect(Lnet/minecraft/core/Holder;)Z"))
-    private boolean spectatorplus$showSyncedFoodSprite(Player instance, net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect) {
+    @Redirect(method = "renderFood(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/entity/player/Player;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;hasEffect(Lnet/minecraft/core/Holder;)Z"))
+    private boolean spectatorplus$showSyncedFoodSprite(Player instance,
+            net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect) {
         final LocalPlayer player = this.minecraft.player;
         if (player != null && player.hasEffect(effect)) {
             return true;
@@ -344,7 +378,8 @@ public abstract class GuiMixin {
 
     @Redirect(method = "renderItemHotbar(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;getItem(I)Lnet/minecraft/world/item/ItemStack;"))
     private ItemStack spectatorplus$showSyncedItems(Inventory instance, int slot) {
-        if (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1 && SpecUtil.getCameraPlayer(this.minecraft) != null) {
+        if (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1
+                && SpecUtil.getCameraPlayer(this.minecraft) != null) {
             return ClientSyncController.syncData.hotbarItems.get(slot);
         }
         return instance.getItem(slot);
@@ -352,7 +387,8 @@ public abstract class GuiMixin {
 
     @Redirect(method = "renderHotbarAndDecorations", at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/LocalPlayer;experienceLevel:I", opcode = Opcodes.GETFIELD))
     private int spectatorplus$showSyncedExperienceLevel(LocalPlayer instance) {
-        if (ClientSyncController.syncData != null && ClientSyncController.syncData.experienceLevel != -1 && SpecUtil.getCameraPlayer(this.minecraft) != null) {
+        if (ClientSyncController.syncData != null && ClientSyncController.syncData.experienceLevel != -1
+                && SpecUtil.getCameraPlayer(this.minecraft) != null) {
             return ClientSyncController.syncData.experienceLevel;
         }
         return instance.experienceLevel;
@@ -365,6 +401,7 @@ public abstract class GuiMixin {
         }
         return instance;
     }
+
     // Map EffectType to vanilla effect icon Identifier
     private static Identifier getEffectIcon(String effectKey) {
         // If effectKey contains a namespace (e.g., minecraft:nausea), strip it

@@ -43,7 +43,9 @@ tasks {
     }
 
     jar {
-        enabled = false // only output shadow jar
+        enabled = true
+        archiveClassifier.set("")
+        from("../LICENSE")
     }
 
     runServer {
