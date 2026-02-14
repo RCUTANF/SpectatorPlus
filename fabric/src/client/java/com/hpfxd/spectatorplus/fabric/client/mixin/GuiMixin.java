@@ -138,7 +138,8 @@ public abstract class GuiMixin {
 
                 // Render all spectatee's armor in the top right: helmet, chestplate, leggings,
                 // boots
-                if (ClientSyncController.syncData != null && ClientSyncController.syncData.armorItems != null) {
+                if (ClientSyncController.syncData != null && ClientSyncController.syncData.armorItems != null
+                        && SpectatorClientMod.config.renderArmor) {
                     int spacing = 1; // vertical spacing between items
                     int itemWidth = 16; // standard item icon width
                     int itemHeight = 16; // standard item icon height
@@ -197,7 +198,7 @@ public abstract class GuiMixin {
                     int effectBaseY = baseY + slots.length * (itemHeight + spacing) + spacing; // start below armor
 
                     // Render all active effect icons down the right side below armor
-                    if (ClientSyncController.syncData.effects != null
+                    if (SpectatorClientMod.config.renderEffects && ClientSyncController.syncData.effects != null
                             && !ClientSyncController.syncData.effects.isEmpty()) {
                         int effectIndex = 0;
                         for (var effectInstance : ClientSyncController.syncData.effects) {

@@ -5,6 +5,8 @@ public class ClientConfig {
     public boolean renderStatusIfNoHotbar = true;
     public boolean renderHotbar = true;
     public boolean renderArms = true;
+    public boolean renderArmor = true;
+    public boolean renderEffects = true;
     public boolean showSpectators = true;
     public boolean highlightSpectators = true;
     public boolean showInvisibleEntities = true;
