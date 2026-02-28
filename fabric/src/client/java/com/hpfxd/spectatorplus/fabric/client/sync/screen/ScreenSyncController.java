@@ -1,9 +1,8 @@
 package com.hpfxd.spectatorplus.fabric.client.sync.screen;
 
-import com.hpfxd.spectatorplus.fabric.client.gui.screens.SyncedInventoryScreen;
 import com.hpfxd.spectatorplus.fabric.client.gui.screens.DummyContainer;
+import com.hpfxd.spectatorplus.fabric.client.gui.screens.SyncedInventoryScreen;
 import com.hpfxd.spectatorplus.fabric.client.mixin.InventoryAccessor;
-import com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController;
 import com.hpfxd.spectatorplus.fabric.client.util.SpecUtil;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundContainerSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundInventorySyncPacket;
@@ -268,6 +267,7 @@ public class ScreenSyncController {
 
     public static <S extends Screen & MenuAccess<?>> void handleNewSyncedScreen(Minecraft mc, S screen) {
         isPendingOpen = false;
+        if(mc.player == null) return;
         mc.player.containerMenu = screen.getMenu();
         mc.setScreen(screen);
 

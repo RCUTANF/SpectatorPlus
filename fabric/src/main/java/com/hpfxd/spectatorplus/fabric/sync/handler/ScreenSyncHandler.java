@@ -5,14 +5,11 @@ import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundInventorySyncPacket
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundScreenSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ServerboundOpenedInventorySyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ServerboundRequestInventoryOpenPacket;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
 
 public class ScreenSyncHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScreenSyncHandler.class);
@@ -95,9 +92,7 @@ public class ScreenSyncHandler {
     }
 
     public static void updatePlayerInventory(ServerPlayer player, ItemStack[] inventorySendSlots) {
-        for (ServerPlayer spectator : ServerSyncController.getSpectators(player)) {
-            ServerSyncController.broadcastPacketToSpectators(player, new ClientboundInventorySyncPacket(player.getUUID(), inventorySendSlots));
-        }
+        ServerSyncController.broadcastPacketToSpectators(player, new ClientboundInventorySyncPacket(player.getUUID(), inventorySendSlots));
     }
 
     /**

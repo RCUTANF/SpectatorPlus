@@ -5,7 +5,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import static com.hpfxd.spectatorplus.fabric.client.sync.ClientSyncController.syncData;
 

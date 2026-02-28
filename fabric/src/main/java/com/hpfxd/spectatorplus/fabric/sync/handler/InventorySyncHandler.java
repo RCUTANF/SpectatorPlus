@@ -56,8 +56,6 @@ public class InventorySyncHandler {
         boolean updatedHotbar = false;
         boolean updatedInventory = false;
 
-        final Inventory inventory = player.getInventory();
-
         // Main inventory (0-35) including hotbar (0-8)
         for (int i = 0; i < currentSlots.length; i++) {
             if (!ItemStack.matches(currentSlots[i], slots[i])) {
@@ -96,18 +94,18 @@ public class InventorySyncHandler {
         // Main inventory  (0-35)
         IntStream.range(0, 36).forEach(i -> {
             ItemStack item = inventory.getItem(i);
-            slots[i] = item != null ? item : ItemStack.EMPTY;
+            slots[i] = item;
         });
 
         // Armor (36-39)
         IntStream.range(36, 40).forEach(i -> {
             ItemStack item = inventory.getItem(i);
-            slots[i] = item != null ? item : ItemStack.EMPTY;
+            slots[i] = item;
         });
 
         // Offhand slot (40)
         ItemStack offhand = inventory.getItem(40);
-        slots[40] = offhand != null ? offhand : ItemStack.EMPTY;
+        slots[40] = offhand;
 
         return slots;
     }

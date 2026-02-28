@@ -2,7 +2,6 @@ package com.hpfxd.spectatorplus.fabric.client.sync;
 
 import com.hpfxd.spectatorplus.fabric.client.sync.screen.ScreenSyncController;
 import com.hpfxd.spectatorplus.fabric.client.util.EffectUtil;
-import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundContainerSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundExperienceSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundFoodSyncPacket;
 import com.hpfxd.spectatorplus.fabric.sync.packet.ClientboundHotbarSyncPacket;
@@ -19,7 +18,7 @@ import java.util.UUID;
 
 public class ClientSyncController {
     public static ClientSyncData syncData;
-    private static Minecraft minecraft = Minecraft.getInstance();
+    private static final Minecraft minecraft = Minecraft.getInstance();
 
     public static void init() {
         ClientPlayNetworking.registerGlobalReceiver(ClientboundExperienceSyncPacket.TYPE, ClientSyncController::handle);
