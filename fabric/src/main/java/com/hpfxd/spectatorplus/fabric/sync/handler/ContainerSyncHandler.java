@@ -25,7 +25,7 @@ public class ContainerSyncHandler {
     private static final Map<UUID, ContainerListener> containerListeners = new HashMap<>();
 
     public static void init() {
-        // Clean up listeners when a player disconnects
+        // Clean up listeners when a player disconnects.
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             containerListeners.remove(handler.getPlayer().getUUID());
         });
@@ -33,11 +33,13 @@ public class ContainerSyncHandler {
 
     /**
      * Unsubscribe a spectator from a target player's container.
-     * This removes the container listener.
+     * This removes the container listener to prevent memory leaks and stale updates.
      */
     public static void unsubscribeFromContainer(ServerPlayer spectator, ServerPlayer target) {
-        target.containerMenu.removeSlotListener(containerListeners.get(spectator.getUUID()));
-
+        ContainerListener oldListener = containerListeners.remove(spectator.getUUID());
+        if (oldListener != null) {
+            target.containerMenu.removeSlotListener(oldListener);
+        }
     }
 
     public static void sendPacket(ServerPlayer spectator, ServerPlayer target) {
@@ -58,7 +60,7 @@ public class ContainerSyncHandler {
         flags |= (1 << 2); // Has dummy slots flag for container screens
         ServerSyncController.broadcastPacketToSpectators(target, new ClientboundScreenSyncPacket(target.getUUID(), flags));
 
-        containerMenu.addSlotListener(createContainerListener(spectator, target));
+        containerMenu.addSlotListener(createContainerListener(spectator, target, containerListeners));
 
         spectator.connection.send(new ClientboundOpenScreenPacket(
                 containerMenu.containerId,
@@ -79,8 +81,8 @@ public class ContainerSyncHandler {
         return containerItems;
     }
 
-    public static ContainerListener createContainerListener(ServerPlayer spectator, ServerPlayer target) {
-        return new ContainerListener() {
+    public static ContainerListener createContainerListener(ServerPlayer spectator, ServerPlayer target, Map<UUID, ContainerListener> listenerMap) {
+        ContainerListener listener = new ContainerListener() {
             @Override
             public void slotChanged(@NotNull AbstractContainerMenu menu, int slotIndex, @NotNull ItemStack stack) {
                 // Only sync container slots, not player inventory slots
@@ -109,5 +111,7 @@ public class ContainerSyncHandler {
                 // For now, we don't need to sync this separately
             }
         };
+        listenerMap.put(spectator.getUUID(), listener);
+        return listener;
     }
 }
