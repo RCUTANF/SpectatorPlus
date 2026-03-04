@@ -96,7 +96,7 @@ public class ContainerSyncHandler {
                             update[i] = null;
                         }
                     }
-                    ServerSyncController.broadcastPacketToSpectators(target, new ClientboundContainerSyncPacket(
+                    ServerSyncController.sendPacket(spectator, new ClientboundContainerSyncPacket(
                         target.getUUID(),
                         menu.getType(),
                         update.length,
