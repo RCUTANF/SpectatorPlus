@@ -117,7 +117,9 @@ public class ScreenSyncController {
         syncedInventory = null;
         syncedWindowId = Integer.MIN_VALUE;
         isPendingOpen = false;
-        syncData.screen = null;
+        if (syncData != null) {
+            syncData.screen = null;
+        }
     }
 
     public static void openPlayerInventory(Minecraft mc) {
