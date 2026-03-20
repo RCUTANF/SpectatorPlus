@@ -56,6 +56,7 @@ public abstract class MenuScreensMixin {
                             ScreenSyncController.openContainerScreen(mc,
                                 ClientSyncController.syncData.screen.containerType,
                                 ClientSyncController.syncData.screen.containerSize);
+                            return;
                         } else {
                             // Fallback to original screen creation for unknown container types
                             final Inventory inventory;
@@ -69,6 +70,7 @@ public abstract class MenuScreensMixin {
                             final S screen = screenConstructor.create(menu, inventory, title);
 
                             ScreenSyncController.handleNewSyncedScreen(mc, screen);
+                            return;
                         }
                     }
                 }
