@@ -53,9 +53,10 @@ public abstract class GuiMixin {
     @Shadow
     public abstract SpectatorGui getSpectatorGui();
 
-    protected abstract void renderItemHotbar(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker);
+    @Shadow
+    protected abstract void extractItemHotbar(GuiGraphicsExtractor guiGraphicsExtractor, DeltaTracker deltaTracker);
 
-    protected abstract void renderPortalOverlay(GuiGraphicsExtractor guiGraphics, float intensity);
+
 
     @Shadow
     @Final
@@ -121,7 +122,7 @@ public abstract class GuiMixin {
         return instance.getPercentFrozen();
     }
 
-    @Inject(method = "extractHotbarAndDecorations(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/spectator/SpectatorGui;renderHotbar(Lnet/minecraft/client/gui/GuiGraphicsExtractor;)V"))
+    @Inject(method = "extractHotbarAndDecorations(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/spectator/SpectatorGui;extractHotbar(Lnet/minecraft/client/gui/GuiGraphicsExtractor;)V"))
     private void spectatorplus$renderHotbar(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci,
             @Share("spectated") LocalRef<AbstractClientPlayer> spectatedRef) {
         if (!this.getSpectatorGui().isMenuActive() && !this.minecraft.options.hideGui) {
@@ -131,7 +132,7 @@ public abstract class GuiMixin {
             if (spectated != null) {
                 if (ClientSyncController.syncData != null && ClientSyncController.syncData.selectedHotbarSlot != -1
                         && !spectated.isSpectator() && SpectatorClientMod.config.renderHotbar) {
-                    this.renderItemHotbar(guiGraphics, deltaTracker);
+                    this.extractItemHotbar(guiGraphics, deltaTracker);
                 }
 
                 // Render all spectatee's armor in the top right: helmet, chestplate, leggings,

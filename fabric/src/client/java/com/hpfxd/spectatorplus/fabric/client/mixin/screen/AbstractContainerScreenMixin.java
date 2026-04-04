@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -55,11 +55,11 @@ public abstract class AbstractContainerScreenMixin {
     @Shadow protected int topPos;
 
     @Inject(
-            method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickAction;)V",
+            method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ContainerInput;)V",
             at = @At("HEAD"),
             cancellable = true
     )
-    private void spectatorplus$noClickingOnSyncedScreens(Slot slot, int slotId, int mouseButton, ClickAction type, CallbackInfo ci) {
+    private void spectatorplus$noClickingOnSyncedScreens(Slot slot, int slotId, int mouseButton, ContainerInput type, CallbackInfo ci) {
         if (this.spectatorplus$isSyncedScreen()) {
             ci.cancel();
         }
