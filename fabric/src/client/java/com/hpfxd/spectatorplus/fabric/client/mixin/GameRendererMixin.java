@@ -37,9 +37,6 @@ public abstract class GameRendererMixin {
     private Minecraft minecraft;
     @Shadow
     @Final
-    private LightTexture lightTexture;
-    @Shadow
-    @Final
     private RenderBuffers renderBuffers;
     @Shadow
     @Final

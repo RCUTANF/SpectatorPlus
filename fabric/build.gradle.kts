@@ -1,5 +1,5 @@
 plugins {
-    id("net.fabricmc.fabric-loom-no-remap") version "1.14.0-alpha.31"
+    id("net.fabricmc.fabric-loom") version "1.15.5"
     id("spectatorplus.platform")
 }
 
@@ -41,16 +41,20 @@ loom {
 dependencies {
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
     implementation("net.fabricmc:fabric-loader:${property("loader_version")}")
-    // MC 26.1 is unobfuscated — no mappings needed
+
+    // Fabric API
     implementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 
     include(implementation("me.lucko:fabric-permissions-api:${property("fabric_permissions_api_version")}")!!)
 
     implementation("me.shedaniel.cloth:cloth-config-fabric:${property("cloth_config_version")}") {
-        exclude("net.fabricmc.fabric-api")
+        exclude(group = "net.fabricmc.fabric-api")
     }
 
     implementation("com.terraformersmc:modmenu:${property("modmenu_version")}")
+
+    include(implementation("io.github.llamalad7:mixinextras-fabric:${property("mixinextras_version")}")!!)
+    annotationProcessor("io.github.llamalad7:mixinextras-fabric:${property("mixinextras_version")}")
 }
 
 tasks {
