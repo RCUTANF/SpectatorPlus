@@ -99,6 +99,19 @@ public class ScreenSyncController {
 
         final ItemStack[] items = packet.items();
         syncData.screen.updateInventoryItems(items);
+
+        if (syncedInventory != null) {
+            syncData.screen.populateInventory(syncedInventory);
+
+            if (syncedScreen instanceof MenuAccess<?> menuAccess) {
+                final AbstractContainerMenu menu = menuAccess.getMenu();
+                for (final Slot slot : menu.slots) {
+                    if (slot.container == syncedInventory) {
+                        slot.set(syncedInventory.getItem(slot.getContainerSlot()));
+                    }
+                }
+            }
+        }
     }
 
     private static void handle(ClientboundScreenCursorSyncPacket packet, ClientPlayNetworking.Context context) {
